@@ -17,7 +17,7 @@
 from collections import OrderedDict
 import torch.nn as nn
 import torch.nn.functional as F
-import import pdb
+import pdb
 
 from .quantizer import Quantizer
 from .q_utils import *
