@@ -199,7 +199,7 @@ class PACTQuantizer(Quantizer):
     # In PACT, LearnedClippedLinearQuantization is used for activation, which contains a learnt 'clip_val' parameter
     # We optimize this value separately from the main model parameters
     def _get_new_optimizer_params_groups(self):
-        pdb.set_trace()
+        #pdb.set_trace()
         clip_val_group = {'params': [param for name, param in self.model.named_parameters() if 'clip_val' in name]}
         if self.act_clip_decay is not None:
             clip_val_group['weight_decay'] = self.act_clip_decay
