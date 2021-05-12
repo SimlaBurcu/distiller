@@ -52,7 +52,7 @@ class ClippedLinearQuantization(nn.Module):
 class LearnedClippedLinearQuantization(nn.Module):
     def __init__(self, num_bits, init_act_clip_val, dequantize=True, inplace=False):
         super(LearnedClippedLinearQuantization, self).__init__()
-        pdb.set_trace()
+        #pdb.set_trace()
         self.num_bits = num_bits
         self.clip_val = nn.Parameter(torch.Tensor([init_act_clip_val]))
         self.dequantize = dequantize
@@ -70,7 +70,7 @@ class LearnedClippedLinearQuantization(nn.Module):
         return input
 
     def __repr__(self):
-        pdb.set_trace()
+        #pdb.set_trace()
         inplace_str = ', inplace' if self.inplace else ''
         return '{0}(num_bits={1}, clip_val={2}{3})'.format(self.__class__.__name__, self.num_bits, self.clip_val.item(),
                                                            inplace_str)
@@ -180,10 +180,10 @@ class PACTQuantizer(Quantizer):
         super(PACTQuantizer, self).__init__(model, optimizer=optimizer, bits_activations=bits_activations,
                                             bits_weights=bits_weights, bits_bias=bits_bias,
                                             overrides=overrides, train_with_fp_copy=True)
-        pdb.set_trace()
+        #pdb.set_trace()
 
         def relu_replace_fn(module, name, qbits_map):
-            pdb.set_trace()
+            #pdb.set_trace()
             bits_acts = qbits_map[name].acts
             if bits_acts is None:
                 return module
