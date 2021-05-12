@@ -59,7 +59,7 @@ class LearnedClippedLinearQuantization(nn.Module):
         self.inplace = inplace
 
     def forward(self, input):
-        pdb.set_trace()
+        #pdb.set_trace()
         # Clip between 0 to the learned clip_val
         input = F.relu(input, self.inplace)
         # Using the 'where' operation as follows gives us the correct gradient with respect to clip_val

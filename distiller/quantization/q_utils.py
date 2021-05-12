@@ -317,11 +317,13 @@ class LinearQuantizeSTE(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, scale, zero_point, dequantize, inplace):
         #pdb.set_trace()
+        print(f'..... quantizing {input}')
         if inplace:
             ctx.mark_dirty(input)
         output = linear_quantize(input, scale, zero_point, inplace)
         if dequantize:
             output = linear_dequantize(output, scale, zero_point, inplace)
+        print(f'..... quantized to {output}')
         return output
 
     @staticmethod

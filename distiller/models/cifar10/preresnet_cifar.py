@@ -62,6 +62,7 @@ class PreactBasicBlock(nn.Module):
         self.preact_downsample = preact_downsample
 
     def forward(self, x):
+        print('>>>>>>>>> in PreactBasicBlock forward .......')
         need_preact = self.block_gates[0] or self.block_gates[1] or self.downsample and self.preact_downsample
         if need_preact:
             preact = self.pre_bn(x)
@@ -71,11 +72,15 @@ class PreactBasicBlock(nn.Module):
             preact = out = x
 
         if self.block_gates[0]:
+            print('>>>>>>>>> in PreactBasicBlock forward conv1')
             out = self.conv1(out)
+            print('>>>>>>>>> in PreactBasicBlock forward bn')
             out = self.bn(out)
+            print('>>>>>>>>> in PreactBasicBlock forward relu')
             out = self.relu(out)
 
         if self.block_gates[1]:
+            print('>>>>>>>>> in PreactBasicBlock forward conv2')
             out = self.conv2(out)
 
         if self.downsample is not None:
@@ -148,11 +153,16 @@ class PreactResNetCifar(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        print('>>>>>>>>> in PreactResNetCifar forward conv1 >>>>>>>>')
         x = self.conv1(x)
+        print('>>>>>>>>> in PreactResNetCifar forward layer1')
 
         x = self.layer1(x)
+        print('>>>>>>>>> in PreactResNetCifar forward layer2')
         x = self.layer2(x)
+        print('>>>>>>>>> in PreactResNetCifar forward layer3')
         x = self.layer3(x)
+        print('>>>>>>>>> in PreactResNetCifar final_bn')
 
         x = self.final_bn(x)
         x = self.final_relu(x)
