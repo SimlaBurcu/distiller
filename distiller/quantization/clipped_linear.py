@@ -52,12 +52,14 @@ class ClippedLinearQuantization(nn.Module):
 class LearnedClippedLinearQuantization(nn.Module):
     def __init__(self, num_bits, init_act_clip_val, dequantize=True, inplace=False):
         super(LearnedClippedLinearQuantization, self).__init__()
+        pdb.set_trace()
         self.num_bits = num_bits
         self.clip_val = nn.Parameter(torch.Tensor([init_act_clip_val]))
         self.dequantize = dequantize
         self.inplace = inplace
 
     def forward(self, input):
+        pdb.set_trace()
         # Clip between 0 to the learned clip_val
         input = F.relu(input, self.inplace)
         # Using the 'where' operation as follows gives us the correct gradient with respect to clip_val
@@ -68,6 +70,7 @@ class LearnedClippedLinearQuantization(nn.Module):
         return input
 
     def __repr__(self):
+        pdb.set_trace()
         inplace_str = ', inplace' if self.inplace else ''
         return '{0}(num_bits={1}, clip_val={2}{3})'.format(self.__class__.__name__, self.num_bits, self.clip_val.item(),
                                                            inplace_str)
@@ -180,6 +183,7 @@ class PACTQuantizer(Quantizer):
         pdb.set_trace()
 
         def relu_replace_fn(module, name, qbits_map):
+            pdb.set_trace()
             bits_acts = qbits_map[name].acts
             if bits_acts is None:
                 return module
