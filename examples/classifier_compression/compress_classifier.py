@@ -62,13 +62,14 @@ import parser
 import os
 import numpy as np
 from ptq_lapq import image_classifier_ptq_lapq
-
+import pdb
 
 # Logger handle
 msglogger = logging.getLogger()
 
 
 def main():
+    pdb.set_trace()
     # Parse arguments
     args = parser.add_cmdline_args(classifier.init_classifier_compression_arg_parser(True)).parse_args()
     app = ClassifierCompressorSampleApp(args, script_dir=os.path.dirname(__file__))
@@ -79,7 +80,7 @@ def main():
     # Finally run results on the test set
     return app.test()
 
-    
+
 def handle_subapps(model, criterion, optimizer, compression_scheduler, pylogger, args):
     def load_test_data(args):
         test_loader = classifier.load_data(args, load_train=False, load_val=False, load_test=True)
