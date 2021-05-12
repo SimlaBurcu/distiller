@@ -24,6 +24,7 @@ import distiller
 import warnings
 from typing import Callable, Optional
 from copy import deepcopy
+import pdb
 
 msglogger = logging.getLogger()
 
@@ -316,7 +317,7 @@ class Quantizer(object):
                     valid_kwargs, invalid_kwargs = distiller.filter_kwargs(self.module_overrides_map[full_name],
                                                                            replace_fn)
                     if invalid_kwargs:
-                        raise TypeError("""Quantizer of type %s doesn't accept \"%s\" 
+                        raise TypeError("""Quantizer of type %s doesn't accept \"%s\"
                                             as override arguments for %s. Allowed kwargs: %s"""
                                         % (type(self), list(invalid_kwargs), type(module), list(valid_kwargs)))
                     new_module = replace_fn(module, full_name, self.module_qbits_map, **valid_kwargs)
@@ -363,6 +364,7 @@ class Quantizer(object):
         """
         Quantize all parameters using self.param_quantization_fn (with the defined number of bits for each parameter)
         """
+        pdb.set_trace()
         for ptq in self.params_to_quantize:
             q_param = self.param_quantization_fn(getattr(ptq.module, ptq.fp_attr_name), ptq)
             if self.train_with_fp_copy:
