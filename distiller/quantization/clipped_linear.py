@@ -17,6 +17,7 @@
 from collections import OrderedDict
 import torch.nn as nn
 import torch.nn.functional as F
+import import pdb
 
 from .quantizer import Quantizer
 from .q_utils import *
@@ -125,7 +126,7 @@ class DorefaParamsBinarizationSTE(torch.autograd.Function):
         E = input.abs().mean()
         output = torch.where(input == 0, torch.ones_like(input), torch.sign(input)) * E
         return output
-    
+
     @staticmethod
     def backward(ctx, grad_output):
         return grad_output, None
@@ -176,6 +177,7 @@ class PACTQuantizer(Quantizer):
         super(PACTQuantizer, self).__init__(model, optimizer=optimizer, bits_activations=bits_activations,
                                             bits_weights=bits_weights, bits_bias=bits_bias,
                                             overrides=overrides, train_with_fp_copy=True)
+        pdb.set_trace()
 
         def relu_replace_fn(module, name, qbits_map):
             bits_acts = qbits_map[name].acts
@@ -193,6 +195,7 @@ class PACTQuantizer(Quantizer):
     # In PACT, LearnedClippedLinearQuantization is used for activation, which contains a learnt 'clip_val' parameter
     # We optimize this value separately from the main model parameters
     def _get_new_optimizer_params_groups(self):
+        pdb.set_trace()
         clip_val_group = {'params': [param for name, param in self.model.named_parameters() if 'clip_val' in name]}
         if self.act_clip_decay is not None:
             clip_val_group['weight_decay'] = self.act_clip_decay
