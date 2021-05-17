@@ -109,7 +109,7 @@ class WRPNQuantizer(Quantizer):
         self.replacement_factory[nn.ReLU] = relu_replace_fn
 
 
-def dorefa_quantize_param(param_fp, param_meta):
+def orig_dorefa_quantize_param(param_fp, param_meta):
     if param_meta.num_bits == 1:
         out = DorefaParamsBinarizationSTE.apply(param_fp)
     else:
@@ -118,6 +118,68 @@ def dorefa_quantize_param(param_fp, param_meta):
         out = out / (2 * out.abs().max()) + 0.5
         out = LinearQuantizeSTE.apply(out, scale, zero_point, True, False)
         out = 2 * out - 1
+    return out
+
+__sawb_asymm_lut = {
+    2: [8.356, 7.841],
+    3: [4.643, 3.729],
+    4: [8.356, 7.841],
+    5: [12.522, 12.592],
+    6: [15.344, 15.914],
+    7: [19.767, 21.306],
+    8: [26.294, 29.421]
+}
+
+class SAWB_QuantFunc_Asymm(torch.autograd.Function):
+
+    @staticmethod
+    def forward(ctx, input, eps, alpha, beta, delta=0):
+        # we quantize also alpha, beta. for beta it's "cosmetic", for alpha it is
+        # substantial, because also alpha will be represented as a wholly integer number
+        # down the line
+        alpha_quant = (alpha.item() / (eps+delta)).ceil()  * eps
+        beta_quant  = (beta.item()  / (eps+delta)).floor() * eps
+        where_input_nonclipped = (input >= -alpha_quant) * (input < beta_quant)
+        where_input_ltalpha = (input < -alpha_quant)
+        where_input_gtbeta = (input >= beta_quant)
+        ctx.save_for_backward(where_input_nonclipped, where_input_ltalpha, where_input_gtbeta)
+        return (input.clamp(-alpha_quant.item(), beta_quant.item()) / (eps+delta)).round() * eps
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        # see Hubara et al., Section 2.3
+        where_input_nonclipped, where_input_ltalpha, where_input_gtbeta = ctx.saved_variables
+        zero = torch.zeros(1).to(where_input_nonclipped.device)
+        grad_input = grad_output # torch.where(where_input_nonclipped, grad_output, zero)
+        grad_alpha = torch.where(where_input_ltalpha, grad_output, zero).sum().expand(1)
+        grad_beta  = torch.where(where_input_gtbeta, grad_output, zero).sum().expand(1)
+        return grad_input, None, grad_alpha, grad_beta
+
+pact_quantize_asymm = SAWB_QuantFunc_Asymm.apply
+
+
+def dorefa_quantize_param(param_fp, param_meta):
+    if param_meta.num_bits == 1:
+        out = DorefaParamsBinarizationSTE.apply(param_fp)
+    else:
+        print(f"quantizing: {param_fp} with {param_meta}")
+        # compute E[|w|]
+        Ew1 = param_fp.abs().mean()
+        # compute E[w^2]
+        Ew2 = (param_fp.abs() ** 2).mean()
+        # compute alpha
+        alpha = __sawb_asymm_lut[param_meta.num_bits][0] * torch.sqrt(Ew2) - __sawb_asymm_lut[param_meta.num_bits][1] * Ew1
+        # compute beta
+        eps = 2*alpha / (2**param_meta.num_bits)
+        if asymmetric:
+            beta = alpha + eps * (2**param_meta.num_bits-1)
+        else:
+            beta = alpha + eps * 2**param_meta.num_bits
+
+        print("[weight clip SAWB] %s: Ew1=%.3e Ew2=%.3e alpha=%.3e beta=%.3e" % (n, Ew1, Ew2, m.W_alpha.data.item(), m.W_beta.data.item()))
+
+        out = SAWB_QuantFunc_Asymm.apply(param_fp, eps, alpha, beta)
+        print(f"quantized to: {out}")
     return out
 
 
