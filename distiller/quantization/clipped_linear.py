@@ -177,7 +177,7 @@ def dorefa_quantize_param(param_fp, param_meta):
         else:
             beta = alpha + eps * 2**param_meta.num_bits
 
-        print("[weight clip SAWB] : Ew1=%.3e Ew2=%.3e alpha=%.3e beta=%.3e" % (Ew1, Ew2, alpha.data.item(), beta.data.item()))
+        #print("[weight clip SAWB] : Ew1=%.3e Ew2=%.3e alpha=%.3e beta=%.3e" % (Ew1, Ew2, alpha.data.item(), beta.data.item()))
 
         out = SAWB_QuantFunc_Asymm.apply(param_fp, eps, alpha, beta)
         #print(f"quantized to: {out}")
