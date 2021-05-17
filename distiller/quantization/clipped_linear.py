@@ -159,6 +159,7 @@ pact_quantize_asymm = SAWB_QuantFunc_Asymm.apply
 
 
 def dorefa_quantize_param(param_fp, param_meta):
+    asymmetric = True
     if param_meta.num_bits == 1:
         out = DorefaParamsBinarizationSTE.apply(param_fp)
     else:
