@@ -159,11 +159,11 @@ pact_quantize_asymm = SAWB_QuantFunc_Asymm.apply
 
 
 def dorefa_quantize_param(param_fp, param_meta):
-    asymmetric = True
+    asymmetric = False
     if param_meta.num_bits == 1:
         out = DorefaParamsBinarizationSTE.apply(param_fp)
     else:
-        print(f"quantizing: {param_fp} with {param_meta}")
+        #print(f"quantizing: {param_fp} with {param_meta}")
         # compute E[|w|]
         Ew1 = param_fp.abs().mean()
         # compute E[w^2]
@@ -180,7 +180,7 @@ def dorefa_quantize_param(param_fp, param_meta):
         print("[weight clip SAWB] : Ew1=%.3e Ew2=%.3e alpha=%.3e beta=%.3e" % (Ew1, Ew2, alpha.data.item(), beta.data.item()))
 
         out = SAWB_QuantFunc_Asymm.apply(param_fp, eps, alpha, beta)
-        print(f"quantized to: {out}")
+        #print(f"quantized to: {out}")
     return out
 
 
