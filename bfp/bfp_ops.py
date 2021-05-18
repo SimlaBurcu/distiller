@@ -35,6 +35,7 @@ import pdb
 import itertools as it
 import logging
 import unittest
+import math
 
 class rounding_modes:
     """
@@ -95,17 +96,17 @@ def _float_to_fp4(t, mant_bits, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
-    if t.item() == 0:
+    if t == 0:
         return 0
-    sign = -1 if t.item()<0 else 1
+    sign = -1 if t < 0 else 1
     t = t * 1.6
-    ebit = (t.abs()).log4().floor()
+    ebit = math.floor(math.log(abs(t),4))
     print(f'ebit:{ebit}')
     if ebit < -3:
         return 0
     if ebit >= 3:
         return sign * 64.0
-    return sign * torch.pow(4.0, ebit)
+    return sign * math.pow(4.0, ebit)
 
 
 '''
@@ -505,8 +506,8 @@ def test_float_to_fp4():
     epsilon = 0
     rounding_mode = 'determ'
 
-    for i in range(10):
-        t = torch.randn(1, device=device, dtype=dtype)
+    number = [0.0064, 0.43733, 0.09754, 0.1647]
+    for t in numbers:
         b=_float_to_fp4(t, epsilon, rounding_mode, device)
         print(b)
 if __name__ == '__main__':
