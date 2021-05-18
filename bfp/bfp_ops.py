@@ -105,7 +105,7 @@ def _float_to_fp4(t, mant_bits, epsilon, rounding_mode, device, exp_given=None):
         return 0
     if ebit >= 3:
         return sign * 64.0
-    return return sign * torch.pow(4.0, ebit)
+    return sign * torch.pow(4.0, ebit)
 
 
 '''
