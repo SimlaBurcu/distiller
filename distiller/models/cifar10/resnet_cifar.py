@@ -69,6 +69,7 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         residual = out = x
 
+        pdb.set_trace()
         if self.block_gates[0]:
             out = self.conv1(x)
             out = self.bn1(out)
@@ -78,7 +79,6 @@ class BasicBlock(nn.Module):
             out = self.conv2(out)
             out = self.bn2(out)
 
-        pdb.set_trace()
         if self.downsample is not None:
             residual = self.downsample(x)
 
