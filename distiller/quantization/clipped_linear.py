@@ -155,8 +155,24 @@ class SAWB_QuantFunc_Asymm(torch.autograd.Function):
         grad_beta  = torch.where(where_input_gtbeta, grad_output, zero).sum().expand(1)
         return grad_input, None, grad_alpha, grad_beta
 
-pact_quantize_asymm = SAWB_QuantFunc_Asymm.apply
+class SAWB_QuantFunc_STE(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, input, eps, alpha, beta, delta=0):
+        # we quantize also alpha, beta. for beta it's "cosmetic", for alpha it is
+        # substantial, because also alpha will be represented as a wholly integer number
+        # down the line
+        alpha_quant = (alpha.item() / (eps+delta)).ceil()  * eps
+        beta_quant  = (beta.item()  / (eps+delta)).floor() * eps
+        where_input_nonclipped = (input >= -alpha_quant) * (input < beta_quant)
+        where_input_ltalpha = (input < -alpha_quant)
+        where_input_gtbeta = (input >= beta_quant)
+        ctx.save_for_backward(where_input_nonclipped, where_input_ltalpha, where_input_gtbeta)
+        return (input.clamp(-alpha_quant.item(), beta_quant.item()) / (eps+delta)).round() * eps
 
+    @staticmethod
+    def backward(ctx, grad_output):
+        # Straight-through estimator
+        return grad_output, None, None, None, None
 
 def dorefa_quantize_param(param_fp, param_meta):
     asymmetric = False
@@ -179,7 +195,7 @@ def dorefa_quantize_param(param_fp, param_meta):
 
         #print("[weight clip SAWB] : Ew1=%.3e Ew2=%.3e alpha=%.3e beta=%.3e" % (Ew1, Ew2, alpha.data.item(), beta.data.item()))
 
-        out = SAWB_QuantFunc_Asymm.apply(param_fp, eps, alpha, beta)
+        out = SAWB_QuantFunc_STE.apply(param_fp, eps, alpha, beta)
         #print(f"quantized to: {out}")
     return out
 
