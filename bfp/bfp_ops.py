@@ -91,7 +91,7 @@ def _float_to_bfp(t, mant_bits, epsilon, rounding_mode, device, exp_given=None):
 
     #To ensure that there is no underflow or overflow
     return torch.min(torch.max(rounded, -max_v), max_v)
-def _float_to_fp4(t, mant_bits, epsilon, rounding_mode, device, exp_given=None):
+def _float_to_fp4(t, mant_bits, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
