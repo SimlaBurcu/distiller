@@ -224,6 +224,7 @@ class Quantizer(object):
             with a reference to 'new_relu1'. Any override configuration made specifically for 'self.relu2'
             will be ignored. A warning message will be shown.
         """
+        pdb.set_trace()
         if self.prepared:
             raise RuntimeError('prepare_model can be called only once')
 
