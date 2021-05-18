@@ -76,8 +76,6 @@ def main():
     if app.handle_subapps():
         return
     init_knowledge_distillation(app.args, app.model, app.compression_scheduler)
-    print(app.model)
-    pdb.set_trace()
     app.run_training_loop()
     # Finally run results on the test set
     return app.test()
