@@ -506,7 +506,7 @@ def test_float_to_fp4():
     epsilon = 0
     rounding_mode = 'determ'
 
-    number = [0.0064, 0.43733, 0.09754, 0.1647]
+    numbers = [0.0064, 0.43733, 0.09754, 0.1647]
     for t in numbers:
         b=_float_to_fp4(t, epsilon, rounding_mode, device)
         print(b)
