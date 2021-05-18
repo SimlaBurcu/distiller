@@ -81,7 +81,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        pdb.set_trace()
+        #pdb.set_trace()
         out = self.residual_eltwiseadd(residual, out)
         out = self.relu2(out)
 

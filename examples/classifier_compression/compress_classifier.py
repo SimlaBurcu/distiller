@@ -69,7 +69,7 @@ msglogger = logging.getLogger()
 
 
 def main():
-    pdb.set_trace()
+    #pdb.set_trace()
     # Parse arguments
     args = parser.add_cmdline_args(classifier.init_classifier_compression_arg_parser(True)).parse_args()
     app = ClassifierCompressorSampleApp(args, script_dir=os.path.dirname(__file__))
