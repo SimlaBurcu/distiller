@@ -486,7 +486,7 @@ def _float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
     """
     print(f'-------orig:{t}---------')
     if t == 0:
-        return 0
+        return 0, 0
     sign = -1 if t < 0 else 1
     t = t * 1.6
     ebit = math.floor(math.log(abs(t),4))
