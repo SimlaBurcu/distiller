@@ -484,11 +484,11 @@ def even_float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
-    print(f'-------orig:{t}---------')
     if t == 0:
         return 0
     sign = -1 if t < 0 else 1
     t = t * 1.6
+    print(f'---even: {t}')
     ebit = math.floor(math.log(abs(t),4))
     if ebit < -3:
         return 0
@@ -506,6 +506,7 @@ def odd_float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
         return 0
     sign = -1 if t < 0 else 1
     t = t * 1.6
+    print(f'---odd: {t}')
     ebit = math.floor(math.log(abs(t),2))
     if ebit < -7:
         return 0
@@ -530,6 +531,7 @@ def test_float_to_fp4():
     numbers = [0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0]
     numbers2 = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
     for t in numbers:
+        print(f'-------orig:{t}---------')
         a=even_float_to_fp4(t, epsilon, rounding_mode, device)
         b=odd_float_to_fp4(t, epsilon, rounding_mode, device)
         print(f'even:{a}, odd:{b}')
