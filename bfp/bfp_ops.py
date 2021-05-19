@@ -492,10 +492,11 @@ def _float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
     print(f't*1.6=:{t}')
     b2bit = math.floor(math.log(abs(t),2))
     print(f'b2bit:{b2bit}')
+    print(f'math.log(abs(t),4): {math.log(abs(t),4)}')
     ebit = math.floor(math.log(abs(t),4))
     print(f'ebit:{ebit}')
     if ebit < -3:
-        return 0
+        return sign * math.pow(4.0, -3)
     if ebit >= 3:
         return sign * 64.0
     return sign * math.pow(4.0, ebit)
