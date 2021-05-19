@@ -492,15 +492,13 @@ def _float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
     print(f't*1.6=:{t}')
     b2bit = math.floor(math.log(abs(t),2))
     print(f'b2bit:{b2bit}')
-    print(f'math.log(abs(t),4): {math.log(abs(t),4)}')
     ebit = math.floor(math.log(abs(t),4))
     print(f'ebit:{ebit}')
     if ebit < -3:
-        return sign * math.pow(4.0, -3)
+        return 0, 0
     if ebit >= 3:
-        return sign * 64.0
-    return sign * math.pow(4.0, ebit)
-
+        return sign * 64.0, sign * 32.0
+    return sign * math.pow(4.0, ebit), sign * math.pow(4.0, ebit) * 0.5
 def test_float_to_fp4():
     """
     Generate random fp32 tensors
@@ -514,8 +512,8 @@ def test_float_to_fp4():
 
     numbers = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
     for t in numbers:
-        b=_float_to_fp4(t, epsilon, rounding_mode, device)
-        print(b)
+        a,b=_float_to_fp4(t, epsilon, rounding_mode, device)
+        print(f'even:{a}, odd:{b}')
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
     test_float_to_fp4()
