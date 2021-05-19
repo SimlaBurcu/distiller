@@ -489,11 +489,7 @@ def _float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
         return 0
     sign = -1 if t < 0 else 1
     t = t * 1.6
-    print(f't*1.6=:{t}')
-    b2bit = math.floor(math.log(abs(t),2))
-    print(f'b2bit:{b2bit}')
     ebit = math.floor(math.log(abs(t),4))
-    print(f'ebit:{ebit}')
     if ebit < -3:
         return 0, 0
     if ebit >= 3:
@@ -510,7 +506,8 @@ def test_float_to_fp4():
     epsilon = 0
     rounding_mode = 'determ'
 
-    numbers = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
+    numbers = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
+    numbers2 = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
     for t in numbers:
         a,b=_float_to_fp4(t, epsilon, rounding_mode, device)
         print(f'even:{a}, odd:{b}')
