@@ -92,22 +92,6 @@ def _float_to_bfp(t, mant_bits, epsilon, rounding_mode, device, exp_given=None):
 
     #To ensure that there is no underflow or overflow
     return torch.min(torch.max(rounded, -max_v), max_v)
-def _float_to_fp4(t, mant_bits, epsilon, rounding_mode, exp_given=None):
-    """
-    Convert float tensor t to fp4
-    """
-    if t == 0:
-        return 0
-    sign = -1 if t < 0 else 1
-    t = t * 1.6
-    ebit = math.floor(math.log(abs(t),4))
-    print(f'ebit:{ebit}')
-    if ebit < -3:
-        return 0
-    if ebit >= 3:
-        return sign * 64.0
-    return sign * math.pow(4.0, ebit)
-
 
 '''
 def float_to_bfp_batched(t, mant_bits, epsilon, rounding_mode, device, bfp_tile_size=25,
@@ -495,6 +479,26 @@ class TestCases(unittest.TestCase):
                 for tensor_element in b.flatten().tolist():
                     self.assertIn(tensor_element, bfp_numbers, msg="{} is not representable in bfp with {} mantissa bits".format(tensor_element, mant_bits))
                 #print("...Generated tensor {} \nis representable in bfp with {} mantissa bits as \n{}".format(t, mant_bits, b))
+
+def _float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
+    """
+    Convert float tensor t to fp4
+    """
+    if t == 0:
+        return 0
+    sign = -1 if t < 0 else 1
+    t = t * 1.6
+    print(f't*1.6=:{t}')
+    b2bit = math.floor(math.log(abs(t),2))
+    print(f'b2bit:{b2bit}')
+    ebit = math.floor(math.log(abs(t),4))
+    print(f'ebit:{ebit}')
+    if ebit < -3:
+        return 0
+    if ebit >= 3:
+        return sign * 64.0
+    return sign * math.pow(4.0, ebit)
+
 def test_float_to_fp4():
     """
     Generate random fp32 tensors
