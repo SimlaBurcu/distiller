@@ -484,6 +484,7 @@ def _float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
+    print(f'-------orig:{t}---------')
     if t == 0:
         return 0
     sign = -1 if t < 0 else 1
@@ -510,7 +511,7 @@ def test_float_to_fp4():
     epsilon = 0
     rounding_mode = 'determ'
 
-    numbers = [0.0064, 0.43733, 0.09754, 0.1647]
+    numbers = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
     for t in numbers:
         b=_float_to_fp4(t, epsilon, rounding_mode, device)
         print(b)
