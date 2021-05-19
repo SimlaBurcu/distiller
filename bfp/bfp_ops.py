@@ -490,11 +490,13 @@ def _float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
     sign = -1 if t < 0 else 1
     t = t * 1.6
     ebit = math.floor(math.log(abs(t),4))
+    obit = math.floor(math.log(abs(t),2))
+    print(f'obit: {obit}')
     if ebit < -3:
         return 0, 0
     if ebit >= 3:
         return sign * 64.0, sign * 32.0
-    return sign * math.pow(4.0, ebit), sign * math.pow(4.0, ebit) * 0.5
+    return sign * math.pow(4.0, ebit), sign * math.pow(2.0, obit)
 def test_float_to_fp4():
     """
     Generate random fp32 tensors
