@@ -27,12 +27,12 @@ quantizers:
       conv1:
         bits_weights: null
         bits_activations: null
-      layer2.0.downsample.0:
-        bits_weights: null
-        bits_activations: null
-      layer3.0.downsample.0:
-        bits_weights: null
-        bits_activations: null
+      #layer2.0.downsample.0:
+      #  bits_weights: null
+      #  bits_activations: null
+      #layer3.0.downsample.0:
+      #  bits_weights: null
+      #  bits_activations: null
       fc:
         bits_weights: null
         bits_activations: null
