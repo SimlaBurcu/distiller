@@ -521,13 +521,15 @@ def tpr(t, epsilon, rounding_mode, exp_given=None):
         return 0
     sign = -1 if t < 0 else 1
     t = t * 1.6
-    ebit = math.floor(math.log(abs(t),2))
+    log2t = math.log(abs(t),2)
+    ebit = math.floor(log2t)
     if rounding_mode=="even":
+        ebit = ebit * 2
         if ebit < -3:
             return 0
         if ebit >= 3:
             return sign * 64.0
-        if ebit.is_integer():
+        if ebit == (log2t/2):
             ebit = ebit - 1
         return sign * math.pow(4.0, ebit)
     else:
@@ -537,7 +539,7 @@ def tpr(t, epsilon, rounding_mode, exp_given=None):
             return sign * 32.0
         if ebit%2 == 0:
             return sign * math.pow(2.0, ebit-1)
-        if ebit.is_integer():
+        if ebit == log2t:
             ebit = ebit - 2
         return sign * math.pow(2.0, ebit)
 
