@@ -504,6 +504,7 @@ def odd_float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
     sign = -1 if t < 0 else 1
     t = t * 1.6
     ebit = math.floor(math.log(abs(t),2))
+
     if ebit < -7:
         return 0
     if ebit >= 5:
@@ -512,8 +513,7 @@ def odd_float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
         return sign * math.pow(2.0, ebit-1)
     return sign * math.pow(2.0, ebit)
 
-
-def tpr_float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
+def tpr(t, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
@@ -522,12 +522,24 @@ def tpr_float_to_fp4(t, epsilon, rounding_mode, exp_given=None):
     sign = -1 if t < 0 else 1
     t = t * 1.6
     ebit = math.floor(math.log(abs(t),2))
-    if ebit < -6:
-        return 0
-    if ebit >= 6:
-        return sign * 64.0
-    return sign * math.pow(2.0, (ebit-ebit%2))
-
+    if rounding_mode=="even":
+        if ebit < -3:
+            return 0
+        if ebit >= 3:
+            return sign * 64.0
+        if ebit.is_integer():
+            ebit = ebit - 1
+        return sign * math.pow(4.0, ebit)
+    else:
+        if ebit < -7:
+            return 0
+        if ebit >= 5:
+            return sign * 32.0
+        if ebit%2 == 0:
+            return sign * math.pow(2.0, ebit-1)
+        if ebit.is_integer():
+            ebit = ebit - 2
+        return sign * math.pow(2.0, ebit)
 
 def test_float_to_fp4():
     """
@@ -546,8 +558,10 @@ def test_float_to_fp4():
         print(f'-------orig:{t}---------')
         a=even_float_to_fp4(t, epsilon, rounding_mode, device)
         b=odd_float_to_fp4(t, epsilon, rounding_mode, device)
-        c=tpr_float_to_fp4(t, epsilon, rounding_mode, device)
-        print(f'even:{a}, odd:{b}, tpr:{b}')
+        c=tpr_float_to_fp4(t, epsilon, "even", device)
+        c=tpr_float_to_fp4(t, epsilon, "odd", device)
+        print(f'even:{a}, odd:{b}')
+        print(f'tpr_even:{c}, tpr_odd:{d}')
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
     test_float_to_fp4()
