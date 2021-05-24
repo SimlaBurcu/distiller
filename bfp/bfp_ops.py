@@ -524,7 +524,7 @@ def tpr(t, epsilon, rounding_mode, exp_given=None):
     log2t = math.log(abs(t),2)
     ebit = math.floor(log2t)
     if rounding_mode=="even":
-        ebit = ebit * 2
+        ebit = ebit / 2
         if ebit < -3:
             return 0
         if ebit >= 3:
