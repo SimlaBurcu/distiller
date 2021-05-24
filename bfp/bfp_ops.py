@@ -558,8 +558,8 @@ def test_float_to_fp4():
         print(f'-------orig:{t}---------')
         a=even_float_to_fp4(t, epsilon, rounding_mode, device)
         b=odd_float_to_fp4(t, epsilon, rounding_mode, device)
-        c=tpr_float_to_fp4(t, epsilon, "even", device)
-        c=tpr_float_to_fp4(t, epsilon, "odd", device)
+        c=tpr(t, epsilon, "even", device)
+        c=tpr(t, epsilon, "odd", device)
         print(f'even:{a}, odd:{b}')
         print(f'tpr_even:{c}, tpr_odd:{d}')
 if __name__ == '__main__':
