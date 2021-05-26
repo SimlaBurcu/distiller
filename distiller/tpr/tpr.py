@@ -424,15 +424,20 @@ def tensortpr(t, epsilon, rounding_mode, exp_given=None):
     ones = torch.ones_like(t)
     sign = torch.where(t < 0, ones*-1, t)
     t = torch.where(t == 0, zeros, t)
+    print(t)
     t = t * 1.6
     log2t = torch.where(t == 0, zeros, t.abs().log2())
     ebit = log2t.floor()
+    print(ebit)
     if rounding_mode=="even":
         ebit = ebit / 2
-        log2t = log2t/2
+        log2t = log2t / 2
         t = torch.where(ebit < -3, zeros, t)
+        print(t)
         t = torch.where(ebit >= 3, ones*64.0, t)
+        print(t)
         ebit = ebit - torch.eq(ebit,log2t).int()
+        print(ebit)
         t = torch.pow(4.0, ebit)*sign
         return t
     else:
