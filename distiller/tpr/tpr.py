@@ -386,36 +386,6 @@ def tpr(t, epsilon, rounding_mode, exp_given=None):
             ebit = ebit - 2
         return sign * math.pow(2.0, ebit)
 
-def get_exponent(t, epsilon):
-    """
-    Find the shared exponent of the tensor t.
-    The exponent of the largest tensor value is selected as the shared exponent.
-    """
-    #Exponent is independent of the sign
-    t = t.abs()
-    #Find the maximum element of the tensor t
-    max_v, _ = t.max(dim=1, keepdim=True)
-    #Get the exponent of that element (We use ceil because in bfp format, we convert using 0.mantissa_bits instead of fp32's 1.mantissa_bits)
-    return (max_v + epsilon).log2().ceil()
-
-def _float_to_bfp(t, mant_bits, epsilon, rounding_mode, device, exp_given=None):
-    """
-    Convert float tensor t to bfp
-    """
-    exp = get_exponent(t, epsilon)
-
-    #The interval between two consecutive numbers with that exponent value
-    interval = torch.pow(2.0, exp-mant_bits)
-    #The maximum representable value with exp
-    max_v = torch.pow(2.0, exp) - interval
-
-    # To ensure that we preserve the interval
-    t = t/interval
-    rounded = round_tensor(t, rounding_mode, device)
-    rounded *=  interval
-
-    #To ensure that there is no underflow or overflow
-    return torch.min(torch.max(rounded, -max_v), max_v)
 def tensortpr(t, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
@@ -462,19 +432,30 @@ def test_float_to_fp4():
     epsilon = 0
     rounding_mode = 'determ'
 
-    numbers = [0.0,1.0,2.0,3.0,4.0,5.0,5.1,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0]
+    numbers = [0.0,1.0,2.0,3.0,4.0,5.0,5.1,6.0,8.0,9.0,10.0,11.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0]
     numbers2 = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
     final = []
-    for t in numbers:
-        print(f'-------orig:{t}---------')
-        c=tpr(t, epsilon, "even", device)
-        d=tpr(t, epsilon, "odd", device)
+    for n in numbers:
+        print(f'-------orig:{n}---------')
+        c=tpr(n, epsilon, "even", device)
+        d=tpr(n, epsilon, "odd", device)
         print(f'tpr_even:{c}, tpr_odd:{d}')
-        final.append(c)
+    t = torch.tensor(numbers).view(2,4,4)
+    orig_shape = t.size()
+    for i t.view(1,-1):
+        print(i)
+        i = tpr(i, epsilon, "even", device)
+    print(t)
+    print(t.view(orig_shape))
+
+
+
+'''
     x_data = torch.tensor(numbers)
     e=tensortpr(x_data, epsilon, "even", device)
     print(f'elwise:{final}')
     print(f'even:{e}')
+'''
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
     test_float_to_fp4()
