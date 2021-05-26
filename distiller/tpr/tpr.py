@@ -440,6 +440,7 @@ def test_float_to_fp4():
         c=tpr(n, epsilon, "even", device)
         d=tpr(n, epsilon, "odd", device)
         print(f'tpr_even:{c}, tpr_odd:{d}')
+        final.append(c)
     t = torch.tensor(numbers).view(2,4,4)
     print(f't orig:{t}')
     orig_shape = t.size()
@@ -451,6 +452,7 @@ def test_float_to_fp4():
         quantized.append(i)
     print(f't:{t}')
     print(f'quantized:{quantized}')
+    print(final)
     print(torch.tensor(quantized).view(orig_shape))
 
 
