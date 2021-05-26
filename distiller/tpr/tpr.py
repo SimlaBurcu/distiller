@@ -421,9 +421,10 @@ def tensortpr(t, epsilon, rounding_mode, exp_given=None):
     Convert float tensor t to fp4
     """
     sign = torch.clone(t)
-    t = torch.where(t == 0, 0., t)
+    zeros = torch.zeros_like(t)
+    t = torch.where(t == 0, zeros, t)
     t = t * 1.6
-    log2t = torch.where(t == 0, 0., t.abs().log2())
+    log2t = torch.where(t == 0, zeros, t.abs().log2())
     ebit = log2t.floor()
     if rounding_mode=="even":
         ebit = ebit / 2
