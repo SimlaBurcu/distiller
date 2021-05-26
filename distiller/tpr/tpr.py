@@ -448,6 +448,7 @@ def test_float_to_fp4():
     for i in t:
         print(f'i:{i}')
         i = tpr(i, epsilon, "even", device)
+        print(f'i:{i}')
     print(f't:{t}')
     print(t.view(orig_shape))
 
