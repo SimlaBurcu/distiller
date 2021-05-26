@@ -443,7 +443,7 @@ def test_float_to_fp4():
     t = torch.tensor(numbers).view(2,4,4)
     print(f't orig:{t}')
     orig_shape = t.size()
-    t = t.view(1,-1)
+    t = t.view(-1)
     print(f't:{t}')
     for i in t:
         print(f'i:{i}')
