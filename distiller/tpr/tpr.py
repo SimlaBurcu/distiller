@@ -431,7 +431,7 @@ def tensortpr(t, epsilon, rounding_mode, exp_given=None):
     print(ebit)
     if rounding_mode=="even":
         ebit = (ebit / 2).floor()
-        log2t = (log2t / 2).floor()
+        log2t = (log2t / 2)
         t = torch.where(ebit < -3, zeros, t)
         print(t)
         t = torch.where(ebit >= 3, ones*64.0, t)
