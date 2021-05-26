@@ -445,12 +445,13 @@ def test_float_to_fp4():
     orig_shape = t.size()
     t = t.view(-1)
     print(f't:{t}')
+    quantized = []
     for i in t:
-        print(f'i:{i}')
         i = tpr(i, epsilon, "even", device)
-        print(f'i:{i}')
+        quantized.append(i)
     print(f't:{t}')
-    print(t.view(orig_shape))
+    print(f'quantized:{quantized}')
+    print(torch.tensor(quantized).view(orig_shape))
 
 
 
