@@ -441,12 +441,14 @@ def test_float_to_fp4():
         d=tpr(n, epsilon, "odd", device)
         print(f'tpr_even:{c}, tpr_odd:{d}')
     t = torch.tensor(numbers).view(2,4,4)
+    print(f't orig:{t}'')
     orig_shape = t.size()
     t = t.view(1,-1)
+    print(f't:{t}'')
     for i in t:
-        print(i)
+        print(f'i:{i}'')
         i = tpr(i, epsilon, "even", device)
-    print(t)
+    print(f't:{t}'')
     print(t.view(orig_shape))
 
 
