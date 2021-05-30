@@ -176,6 +176,7 @@ def test():
 
         optimizer.zero_grad()
 
+        pdb.set_trace()
         o = y_pred(x)
         print(f'o: {o}')
         loss = (o - y).pow(2).sum()
