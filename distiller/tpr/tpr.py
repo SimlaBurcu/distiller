@@ -513,6 +513,7 @@ def test_float_to_fp4():
     finaleven = []
     finalodd = []
     print(numbers)
+    '''
     for n in numbers:
         print(f'-------orig:{n}---------')
         c=tpr(n, epsilon, "even", device)
@@ -523,7 +524,6 @@ def test_float_to_fp4():
     print(numbers)
     print(finaleven)
     print(finalodd)
-    '''
     t = torch.tensor(numbers).view(2,4,4)
     print(f't orig:{t}')
     orig_shape = t.size()
@@ -540,12 +540,11 @@ def test_float_to_fp4():
     '''
 
 
-'''
+
     x_data = torch.tensor(numbers)
     e=tensortpr(x_data, epsilon, "even", device)
-    print(f'elwise:{final}')
     print(f'even:{e}')
-'''
+
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
     test_float_to_fp4()
