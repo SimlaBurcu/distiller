@@ -90,7 +90,7 @@ def _gen_tpr_op(op, name):
     class NewOpIn(torch.autograd.Function):
         @staticmethod
         def forward(ctx, x, w):
-            ctx.save_for_backward(input, weight)
+            ctx.save_for_backward(x, w)
             return (x, w)
 
         @staticmethod
