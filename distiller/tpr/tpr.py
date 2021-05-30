@@ -169,10 +169,8 @@ def test():
     y_pred.cuda()
 
     for t in range(100):
-        x = torch.randn(20, 16, 50, 100)
-        x.cuda()
-        y = torch.randn(20, 16, 50, 100)
-        y.cuda()
+        x = torch.randn(20, 16, 50, 100, device=device)
+        y = torch.randn(20, 16, 50, 100, device=device)
 
         optimizer.zero_grad()
 
