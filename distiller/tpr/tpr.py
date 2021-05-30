@@ -107,7 +107,7 @@ def _gen_tpr_op(op, name):
 
         @staticmethod
         def backward(ctx, op_out_grad):
-            input, weight, bias = ctx.saved_tensors
+            input, weight = ctx.saved_tensors
             grad_input = grad_weight = grad_bias = None
 
             even,odd=tensortpr2(grad_output, epsilon, device)
@@ -115,9 +115,7 @@ def _gen_tpr_op(op, name):
                 grad_input = even.mm(weight)
             if ctx.needs_input_grad[1]:
                 grad_weight = odd.t().mm(input)
-            if bias is not None and ctx.needs_input_grad[2]:
-                grad_bias = odd.sum(0)
-            return grad_input, grad_weight, grad_bias
+            return grad_input, grad_weight
 
     NewOpOut.__name__ = name + '_Out'
     new_op_out = NewOpOut.apply
@@ -181,7 +179,6 @@ def test():
         print(f'loss: {loss}')
 
         # Compute and print loss
-        loss = loss.cuda()
         loss.backward()
         pdb.set_trace()
         optimizer.step()
