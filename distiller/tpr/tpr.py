@@ -509,16 +509,19 @@ def test_float_to_fp4():
 
     numbers = [0.0,1.0,2.0,3.0,4.0,5.0,5.1,6.0,8.0,9.0,10.0,11.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0]
     numbers2 = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
-    final = []
+    finaleven = []
+    finalodd = []
     print(numbers)
     for n in numbers:
         print(f'-------orig:{n}---------')
         c=tpr(n, epsilon, "even", device)
         d=tpr(n, epsilon, "odd", device)
         print(f'tpr_even:{c}, tpr_odd:{d}')
-        final.append(c)
-    print(final)
+        finaleven.append(c)
+        finalodd.append(d)
     print(numbers)
+    print(finaleven)
+    print(finalodd)
     '''
     t = torch.tensor(numbers).view(2,4,4)
     print(f't orig:{t}')
