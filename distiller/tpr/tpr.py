@@ -302,7 +302,6 @@ def F_linear_bfp(**kwargs):
     else:
         return F.linear
 
-
 class BFPConv2d(torch.nn.Conv2d):
     """
     bfp convolutional layer
@@ -356,14 +355,14 @@ class BFPLinear(torch.nn.Linear):
         else:
             raise NotImplementedError('NumFormat not implemented')
 
-def tpr(t, epsilon, rounding_mode, exp_given=None):
+def tpr(tensor, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
-    if t == 0:
+    if tensor == 0:
         return 0
-    sign = -1 if t < 0 else 1
-    t = t * 1.6
+    sign = -1 if tensor < 0 else 1
+    t = tensor * 1.6
     log2t = math.log(abs(t),2)
     ebit = math.floor(log2t)
     if rounding_mode=="even":
@@ -386,29 +385,38 @@ def tpr(t, epsilon, rounding_mode, exp_given=None):
             ebit = ebit - 2
         return sign * math.pow(2.0, ebit)
 
-def tensortpr(t, epsilon, rounding_mode, exp_given=None):
+def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
-    zeros = torch.zeros_like(t)
-    ones = torch.ones_like(t)
-    sign = torch.where(t < 0, ones*-1, t)
-    t = torch.where(t == 0, zeros, t)
-    print(t)
+    print(f'to convert: {tensor}')
+    zeros = torch.zeros_like(tensor)
+    print(f'zeros: {zeros}')
+    ones = torch.ones_like(tensor)
+    print(f'ones: {ones}')
+    sign = torch.where(tensor < 0, ones*-1, tensor)
+    print(f'sign: {sign}')
+    t = torch.where(tensor == 0, zeros, tensor)
+    print(f't: {t}')
     t = t * 1.6
+    print(f'1.6 x t: {t}')
     log2t = torch.where(t == 0, zeros, t.abs().log2())
+    print(f'log2t: {log2t}')
     ebit = log2t.floor()
-    print(ebit)
+    print(f'ebit: {ebit}')
     if rounding_mode=="even":
         ebit = (ebit / 2).floor()
+        print(f'even ebit: {ebit}')
         log2t = (log2t / 2)
+        print(f'even log2t: {log2t}')
         t = torch.where(ebit < -3, zeros, t)
-        print(t)
+        print(f't ebit < -3: {t}')
         t = torch.where(ebit >= 3, ones*64.0, t)
-        print(t)
+        print(f't ebit >= 3: {t}')
         ebit = ebit - torch.eq(ebit,log2t).int()
-        print(ebit)
+        print(f'ebit torch.eq: {ebit}')
         t = torch.pow(4.0, ebit)*sign
+        print(f't: {t}')
         return t
     else:
         if ebit < -7:
@@ -420,6 +428,73 @@ def tensortpr(t, epsilon, rounding_mode, exp_given=None):
         if ebit == log2t:
             ebit = ebit - 2
         return sign * math.pow(2.0, ebit)
+
+
+def _gen_tpr_op(op, name, bfp_args):
+    name = _get_op_name(name, **bfp_args)
+
+    class NewOpIn(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, x, w):
+            ctx.save_for_backward(input, weight, bias)
+            return (x, w)
+
+        @staticmethod
+        def backward(ctx, grad_x, grad_w):
+            return (grad_x, grad_w)
+
+    NewOpIn.__name__ = name + '_In'
+    new_op_in = NewOpIn.apply
+
+    class NewOpOut(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, op_out):
+            return op_out
+
+        @staticmethod
+        def backward(ctx, op_out_grad):
+            input, weight, bias = ctx.saved_tensors
+            grad_input = grad_weight = grad_bias = None
+
+            # These needs_input_grad checks are optional and there only to
+            # improve efficiency. If you want to make your code simpler, you can
+            # skip them. Returning gradients for inputs that don't require it is
+            # not an error.
+            if ctx.needs_input_grad[0]:
+                tpr(n, epsilon, "even", device)
+                grad_input = grad_output.mm(weight)
+            if ctx.needs_input_grad[1]:
+                tpr(n, epsilon, "odd", device)
+                grad_weight = grad_output.t().mm(input)
+            if bias is not None and ctx.needs_input_grad[2]:
+                tpr(n, epsilon, "odd", device)
+                grad_bias = grad_output.sum(0)
+            return tensortpr(op_out_grad, **bfp_args, backward=True)
+
+    NewOpOut.__name__ = name + '_Out'
+    new_op_out = NewOpOut.apply
+
+    def new_op(x, w, *args, **kwargs):
+        x, w = new_op_in(x, w)
+        out = op(x, w, *args, **kwargs)
+        return new_op_out(out)
+
+    return new_op
+
+_bfp_ops = {}
+
+
+def _get_tpr_op(op, name, bfp_args):
+    """
+    Create the bfp version of the operation op
+    This function is called when a bfp layer is defined. See BFPConv2d and BFPLinear below
+    """
+    op_name = _get_op_name(name, **bfp_args)
+    if op_name not in _bfp_ops:
+        _bfp_ops[name] = _gen_tpr_op(op, name, bfp_args)
+
+    return _bfp_ops[name]
+
 
 def test_float_to_fp4():
     """
