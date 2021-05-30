@@ -577,7 +577,7 @@ def test_float_to_fp4():
     start = time.time()
     e,o=tensortpr2(x_data, epsilon, "even", device)
     end = time.time()
-    print('first: {end - start}')
+    print(f'first: {end - start}')
     print(f'even: {e}, odd: {o}')
 
     x_data = torch.tensor(numbers)
@@ -585,7 +585,7 @@ def test_float_to_fp4():
     e=tensortpr(x_data, epsilon, "even", device)
     o=tensortpr(x_data, epsilon, "odd", device)
     end = time.time()
-    print('second: {end - start}')
+    print(f'second: {end - start}')
     print(f'even: {e}, odd: {o}')
 
 if __name__ == '__main__':
