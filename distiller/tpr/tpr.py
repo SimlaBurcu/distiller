@@ -473,8 +473,6 @@ class TPRConv2d(torch.nn.Conv2d):
             return conv + self.bias
         else:
             return conv
-        else:
-            raise NotImplementedError('NumFormat not implemented')
 def test():
     dtype = torch.float
     device = torch.device("cuda:0")
