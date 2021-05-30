@@ -360,7 +360,7 @@ def tpr(tensor, epsilon, rounding_mode, exp_given=None):
     Convert float tensor t to fp4
     """
     if tensor == 0:
-        return 0
+        return 0.0
     sign = -1 if tensor < 0 else 1
     t = tensor * 1.6
     log2t = math.log(abs(t),2)
@@ -368,7 +368,7 @@ def tpr(tensor, epsilon, rounding_mode, exp_given=None):
     if rounding_mode=="even":
         ebit = ebit / 2
         if ebit < -3:
-            return 0
+            return 0.0
         if ebit >= 3:
             return sign * 64.0
         if ebit == (log2t/2):
@@ -376,7 +376,7 @@ def tpr(tensor, epsilon, rounding_mode, exp_given=None):
         return sign * math.pow(4.0, ebit)
     else:
         if ebit < -7:
-            return 0
+            return 0.0
         if ebit >= 5:
             return sign * 32.0
         if ebit%2 == 0:
