@@ -398,7 +398,6 @@ def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
     sign = torch.where(tensor < 0, ones*-1, ones)
     print(f'sign: {sign}')
     t = torch.where(tensor == 0, zeros, tensor)
-    track = torch.where(tensor == 0, ones, track)
     print(f't: {t}')
     t = t * 1.6
     print(f'1.6 x t: {t}')
