@@ -573,9 +573,12 @@ def test_float_to_fp4():
     print(final)
     print(torch.tensor(quantized).view(orig_shape))
     '''
+
+    for i in range(1000):
+        x=1
     x_data = torch.tensor(numbers)
     start = time.time()
-    for i in range(100):
+    for i in range(1000):
         e,o=tensortpr2(x_data, epsilon, "even", device)
     end = time.time()
     print(f'first: {end - start}')
@@ -583,7 +586,7 @@ def test_float_to_fp4():
 
     x_data = torch.tensor(numbers)
     start = time.time()
-    for i in range(100):
+    for i in range(1000):
         e=tensortpr(x_data, epsilon, "even", device)
         o=tensortpr(x_data, epsilon, "odd", device)
     end = time.time()
