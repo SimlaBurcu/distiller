@@ -55,6 +55,7 @@ class ClassifierCompressor(object):
         - Classifier training, verification and testing
     """
     def __init__(self, args, script_dir):
+        pdb.set_trace()
         self.args = copy.deepcopy(args)
         self._infer_implicit_args(self.args)
         self.logdir = _init_logger(self.args, script_dir)
@@ -413,6 +414,7 @@ def _init_learner(args):
         msglogger.debug('Optimizer Args: %s', optimizer.defaults)
 
     if args.compress:
+        pdb.set_trace()
         # The main use-case for this sample application is CNN compression. Compression
         # requires a compression schedule configuration file in YAML.
         compression_scheduler = distiller.file_config(model, optimizer, args.compress, compression_scheduler,
