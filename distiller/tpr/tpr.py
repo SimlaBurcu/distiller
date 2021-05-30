@@ -520,8 +520,8 @@ def test_float_to_fp4():
     numbers2 = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
     finaleven = []
     finalodd = []
-    print(numbers1)
-    for n in numbers1:
+    print(numbers)
+    for n in numbers:
         print(f'-------orig:{n}---------')
         c=tpr(n, epsilon, "even", device)
         d=tpr(n, epsilon, "odd", device)
@@ -548,7 +548,7 @@ def test_float_to_fp4():
 
 
 
-    x_data = torch.tensor(numbers1)
+    x_data = torch.tensor(numbers)
     e=tensortpr(x_data, epsilon, "even", device)
     print(f'even:{e}')
     o=tensortpr(x_data, epsilon, "odd", device)
