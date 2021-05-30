@@ -514,8 +514,8 @@ def test_float_to_fp4():
     numbers2 = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
     finaleven = []
     finalodd = []
-    print(numbers2)
-    for n in numbers2:
+    print(numbers1)
+    for n in numbers1:
         print(f'-------orig:{n}---------')
         c=tpr(n, epsilon, "even", device)
         d=tpr(n, epsilon, "odd", device)
