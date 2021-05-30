@@ -356,72 +356,8 @@ class BFPLinear(torch.nn.Linear):
         else:
             raise NotImplementedError('NumFormat not implemented')
 
-def tpr(tensor, epsilon, rounding_mode, exp_given=None):
-    """
-    Convert float tensor t to fp4
-    """
-    #pdb.set_trace()
-    if tensor == 0:
-        return 0.0
-    sign = -1 if tensor < 0 else 1
-    t = tensor * 1.6
-    log2t = math.log(abs(t),2)
-    ebit = math.floor(log2t)
-    if rounding_mode=="even":
-        ebit = math.floor(ebit / 2)
-        if ebit < -3:
-            return 0.0
-        if ebit >= 3:
-            return sign * 64.0
-        if ebit == (log2t/2):
-            ebit = ebit - 1
-        return sign * math.pow(4.0, ebit)
-    else:
-        if ebit < -7:
-            return 0.0
-        if ebit >= 5:
-            return sign * 32.0
-        if ebit%2 == 0:
-            return sign * math.pow(2.0, ebit-1)
-        if ebit == log2t:
-            ebit = ebit - 2
-        return sign * math.pow(2.0, ebit)
 
-def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
-    """
-    Convert float tensor t to fp4
-    """
-    zeros = torch.zeros_like(tensor)
-    ones = torch.ones_like(tensor)
-    sign = torch.where(tensor < 0, ones*-1, ones)
-    t = torch.where(tensor == 0, zeros, tensor)
-    t = t * 1.6
-    log2t = torch.where(t == 0, zeros, t.abs().log2())
-    ebit = log2t.floor()
-    if rounding_mode=="even":
-        track = torch.zeros_like(tensor)
-        ebit = (ebit / 2).floor()
-        log2t = (log2t / 2)
-        t = torch.where(ebit < -3, zeros, t)
-        track = torch.where(ebit < -3, ones, track)
-        t = torch.where(ebit >= 3, ones*64.0, t)
-        track = torch.where(ebit >= 3, ones, track)
-        ebit = ebit - torch.eq(ebit,log2t).int()
-        t = torch.where(track == 0, torch.pow(4.0, ebit)*sign, t)
-        return torch.where(tensor == 0, zeros, t)
-    else:
-        track = torch.zeros_like(tensor)
-        t = torch.where(ebit < -7, zeros, t)
-        track = torch.where(ebit < -7, ones, track)
-        t = torch.where(ebit >= 5, ones*32.0, t)
-        track = torch.where(ebit >= 5, ones, track)
-        ebit = ebit - torch.eq(ebit%2,zeros).int()
-        ebit = ebit - torch.eq(ebit,log2t).int()*2
-        t = torch.where(track == 0, torch.pow(2.0, ebit)*sign, t)
-        return torch.where(tensor == 0, zeros, t)
-
-
-def tensortpr2(tensor, epsilon, rounding_mode, exp_given=None):
+def tensortpr2(tensor, epsilon, exp_given=None):
     """
     Convert float tensor t to fp4
     """
@@ -461,13 +397,13 @@ def tensortpr2(tensor, epsilon, rounding_mode, exp_given=None):
     odd = torch.where(tensor == 0, zeros, t)
     return even,odd
 
-def _gen_tpr_op(op, name, bfp_args):
-    name = _get_op_name(name, **bfp_args)
+def _gen_tpr_op(op, name):
+    name = _get_op_name(name)
 
     class NewOpIn(torch.autograd.Function):
         @staticmethod
         def forward(ctx, x, w):
-            ctx.save_for_backward(input, weight, bias)
+            ctx.save_for_backward(input, weight)
             return (x, w)
 
         @staticmethod
@@ -487,20 +423,14 @@ def _gen_tpr_op(op, name, bfp_args):
             input, weight, bias = ctx.saved_tensors
             grad_input = grad_weight = grad_bias = None
 
-            # These needs_input_grad checks are optional and there only to
-            # improve efficiency. If you want to make your code simpler, you can
-            # skip them. Returning gradients for inputs that don't require it is
-            # not an error.
+            even,odd=tensortpr2(grad_output, epsilon, device)
             if ctx.needs_input_grad[0]:
-                tpr(n, epsilon, "even", device)
-                grad_input = grad_output.mm(weight)
+                grad_input = even.mm(weight)
             if ctx.needs_input_grad[1]:
-                tpr(n, epsilon, "odd", device)
-                grad_weight = grad_output.t().mm(input)
+                grad_weight = odd.t().mm(input)
             if bias is not None and ctx.needs_input_grad[2]:
-                tpr(n, epsilon, "odd", device)
-                grad_bias = grad_output.sum(0)
-            return tensortpr(op_out_grad, **bfp_args, backward=True)
+                grad_bias = odd.sum(0)
+            return grad_input, grad_weight, grad_bias
 
     NewOpOut.__name__ = name + '_Out'
     new_op_out = NewOpOut.apply
@@ -512,20 +442,65 @@ def _gen_tpr_op(op, name, bfp_args):
 
     return new_op
 
-_bfp_ops = {}
-
-
-def _get_tpr_op(op, name, bfp_args):
+_tpr_ops = {}
+def _get_tpr_op(op, name):
     """
     Create the bfp version of the operation op
     This function is called when a bfp layer is defined. See BFPConv2d and BFPLinear below
     """
-    op_name = _get_op_name(name, **bfp_args)
-    if op_name not in _bfp_ops:
-        _bfp_ops[name] = _gen_tpr_op(op, name, bfp_args)
+    op_name = _get_op_name(name)
+    if op_name not in _tpr_ops:
+        _tpr_ops[name] = _gen_tpr_op(op, name)
 
-    return _bfp_ops[name]
+    return _tpr_ops[name]
 
+
+class TPRConv2d(torch.nn.Conv2d):
+    """
+    tpr convolutional layer
+    """
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1,
+                 padding=0, dilation=1, groups=1, bias=True, **kwargs):
+
+        super().__init__(in_channels, out_channels, kernel_size, stride,
+                         padding, dilation, groups, bias)
+        self.conv_op = _get_tpr_op(F.conv2d, 'Conv2d')
+
+    def forward(self, input):
+        conv = self.conv_op(input, self.weight, None, self.stride,
+                                self.padding, self.dilation, self.groups)
+        if self.bias is not None:
+            return conv + self.bias
+        else:
+            return conv
+        else:
+            raise NotImplementedError('NumFormat not implemented')
+def test():
+    dtype = torch.float
+    device = torch.device("cuda:0")
+    y_pred = TPRConv2d(16, 33, (3, 5), stride=(2, 1), padding=(4, 2))
+    optimizer = SGD(y_pred.parameters(), lr=0.1)
+
+    y_pred.cuda()
+
+    for t in range(100):
+        x = torch.randn(20, 16, 50, 100)
+        y = torch.randn(20, 16, 50, 100)
+
+        optimizer.zero_grad()
+
+        o = y_pred(x)
+        print(f'o: {o}')
+        loss = (o - y).pow(2).sum()
+        print(f'loss: {loss}')
+
+        # Compute and print loss
+        loss = loss.cuda()
+        loss.backward()
+        pdb.set_trace()
+        optimizer.step()
+
+        print(loss.item())
 
 def test_float_to_fp4():
     """
@@ -584,15 +559,7 @@ def test_float_to_fp4():
     print(f'first: {end - start}')
     print(f'even: {e}, odd: {o}')
 
-    x_data = torch.tensor(numbers)
-    start = time.time()
-    for i in range(1000):
-        e=tensortpr(x_data, epsilon, "even", device)
-        o=tensortpr(x_data, epsilon, "odd", device)
-    end = time.time()
-    print(f'second: {end - start}')
-    print(f'even: {e}, odd: {o}')
 
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
-    test_float_to_fp4()
+    test()
