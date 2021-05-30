@@ -82,7 +82,7 @@ def _get_op_name(name):
     """
     Returns the operation's name that is performed in BFP format
     """
-    return  '%s_FP4_%s_%d' % (name)
+    return  'FP4_%s' % (name)
 
 def _gen_tpr_op(op, name):
     name = _get_op_name(name)
