@@ -359,7 +359,7 @@ def tpr(tensor, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
-    pdb.set_trace()
+    #pdb.set_trace()
     if tensor == 0:
         return 0.0
     sign = -1 if tensor < 0 else 1
@@ -367,7 +367,7 @@ def tpr(tensor, epsilon, rounding_mode, exp_given=None):
     log2t = math.log(abs(t),2)
     ebit = math.floor(log2t)
     if rounding_mode=="even":
-        ebit = ebit / 2
+        ebit = math.floor(ebit / 2)
         if ebit < -3:
             return 0.0
         if ebit >= 3:
