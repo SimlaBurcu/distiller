@@ -417,7 +417,7 @@ def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
         ebit = ebit - torch.eq(ebit,log2t).int()
         print(f'ebit torch.eq: {ebit}')
         t = torch.pow(4.0, ebit)*sign
-        print(f't: {t}')
+        print(f't: {torch.where(tensor == 0, zeros, t)}')
         return t
     else:
         if ebit < -7:
