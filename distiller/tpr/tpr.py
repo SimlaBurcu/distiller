@@ -425,7 +425,6 @@ def tensortpr2(tensor, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
-    even, odd = None
     zeros = torch.zeros_like(tensor)
     ones = torch.ones_like(tensor)
     sign = torch.where(tensor < 0, ones*-1, ones)
