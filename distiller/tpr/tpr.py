@@ -395,7 +395,7 @@ def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
     print(f'zeros: {zeros}')
     ones = torch.ones_like(tensor)
     print(f'ones: {ones}')
-    sign = torch.where(tensor < 0, ones*-1, tensor)
+    sign = torch.where(tensor < 0, ones*-1, ones)
     print(f'sign: {sign}')
     t = torch.where(tensor == 0, zeros, tensor)
     print(f't: {t}')
