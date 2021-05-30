@@ -359,6 +359,7 @@ def tpr(tensor, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
+    pdb.set_trace()
     if tensor == 0:
         return 0.0
     sign = -1 if tensor < 0 else 1
