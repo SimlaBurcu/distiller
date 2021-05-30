@@ -170,9 +170,9 @@ def test():
 
     for t in range(100):
         x = torch.randn(20, 16, 50, 100)
-        x.to(device)
+        x.cuda()
         y = torch.randn(20, 16, 50, 100)
-        y.to(device)
+        y.cuda()
 
         optimizer.zero_grad()
 
