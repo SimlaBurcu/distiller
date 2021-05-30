@@ -418,18 +418,19 @@ def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
         print(f'ebit torch.eq: {ebit}')
         t = torch.pow(4.0, ebit)*sign
         print(f't: {torch.where(tensor == 0, zeros, t)}')
-        return t
+        return torch.where(tensor == 0, zeros, t)
     else:
-        if ebit < -7:
-            return 0
-        if ebit >= 5:
-            return sign * 32.0
-        if ebit%2 == 0:
-            return sign * math.pow(2.0, ebit-1)
-        if ebit == log2t:
-            ebit = ebit - 2
-        return sign * math.pow(2.0, ebit)
-
+        t = torch.where(ebit < -7, zeros, t)
+        print(f't ebit < -7: {t}')
+        t = torch.where(ebit >= 5, ones*32.0, t)
+        print(f't ebit >= 5: {t}')
+        ebit = ebit - torch.eq(ebit%2,zeros).int()
+        print(f't ebit%2: {ebit}')
+        ebit = ebit - torch.eq(ebit,log2t).int()*2
+        print(f'ebit torch.eq: {ebit}')
+        t = torch.pow(2.0, ebit)*sign
+        print(f't: {torch.where(tensor == 0, zeros, t)}')
+        return torch.where(tensor == 0, zeros, t)
 
 def _gen_tpr_op(op, name, bfp_args):
     name = _get_op_name(name, **bfp_args)
@@ -544,6 +545,8 @@ def test_float_to_fp4():
     x_data = torch.tensor(numbers)
     e=tensortpr(x_data, epsilon, "even", device)
     print(f'even:{e}')
+    o=tensortpr(x_data, epsilon, "odd", device)
+    print(f'odd:{o}')
 
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
