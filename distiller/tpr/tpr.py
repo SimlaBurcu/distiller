@@ -36,6 +36,7 @@ import itertools as it
 import logging
 import unittest
 import math
+import time
 
 class rounding_modes:
     """
@@ -390,52 +391,52 @@ def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
     """
     Convert float tensor t to fp4
     """
-    print(f'to convert: {tensor}')
+    #print(f'to convert: {tensor}')
     zeros = torch.zeros_like(tensor)
-    print(f'zeros: {zeros}')
+    #print(f'zeros: {zeros}')
     ones = torch.ones_like(tensor)
-    print(f'ones: {ones}')
+    #print(f'ones: {ones}')
     sign = torch.where(tensor < 0, ones*-1, ones)
-    print(f'sign: {sign}')
+    #print(f'sign: {sign}')
     t = torch.where(tensor == 0, zeros, tensor)
-    print(f't: {t}')
+    #print(f't: {t}')
     t = t * 1.6
-    print(f'1.6 x t: {t}')
+    #print(f'1.6 x t: {t}')
     log2t = torch.where(t == 0, zeros, t.abs().log2())
-    print(f'log2t: {log2t}')
+    #print(f'log2t: {log2t}')
     ebit = log2t.floor()
-    print(f'ebit: {ebit}')
+    #print(f'ebit: {ebit}')
     if rounding_mode=="even":
         track = torch.zeros_like(tensor)
         ebit = (ebit / 2).floor()
-        print(f'even ebit: {ebit}')
+        #print(f'even ebit: {ebit}')
         log2t = (log2t / 2)
-        print(f'even log2t: {log2t}')
+        #print(f'even log2t: {log2t}')
         t = torch.where(ebit < -3, zeros, t)
         track = torch.where(ebit < -3, ones, track)
-        print(f't ebit < -3: {t}')
+        #print(f't ebit < -3: {t}')
         t = torch.where(ebit >= 3, ones*64.0, t)
         track = torch.where(ebit >= 3, ones, track)
-        print(f't ebit >= 3: {t}')
+        #print(f't ebit >= 3: {t}')
         ebit = ebit - torch.eq(ebit,log2t).int()
-        print(f'ebit torch.eq: {ebit}')
+        #print(f'ebit torch.eq: {ebit}')
         t = torch.where(track == 0, torch.pow(4.0, ebit)*sign, t)
-        print(f't: {torch.where(tensor == 0, zeros, t)}')
+        #print(f't: {torch.where(tensor == 0, zeros, t)}')
         return torch.where(tensor == 0, zeros, t)
     else:
         track = torch.zeros_like(tensor)
         t = torch.where(ebit < -7, zeros, t)
         track = torch.where(ebit < -7, ones, track)
-        print(f't ebit < -7: {t}')
+        #print(f't ebit < -7: {t}')
         t = torch.where(ebit >= 5, ones*32.0, t)
         track = torch.where(ebit >= 5, ones, track)
-        print(f't ebit >= 5: {t}')
+        #print(f't ebit >= 5: {t}')
         ebit = ebit - torch.eq(ebit%2,zeros).int()
-        print(f't ebit%2: {ebit}')
+        #print(f't ebit%2: {ebit}')
         ebit = ebit - torch.eq(ebit,log2t).int()*2
-        print(f'ebit torch.eq: {ebit}')
+        #print(f'ebit torch.eq: {ebit}')
         t = torch.where(track == 0, torch.pow(2.0, ebit)*sign, t)
-        print(f't: {torch.where(tensor == 0, zeros, t)}')
+        #print(f't: {torch.where(tensor == 0, zeros, t)}')
         return torch.where(tensor == 0, zeros, t)
 
 def _gen_tpr_op(op, name, bfp_args):
@@ -520,38 +521,45 @@ def test_float_to_fp4():
     numbers2 = [0.0064, 0.00664, 0.01133, 0.5036, 0.3617, 0.43733, 0.09754, 0.1647]
     finaleven = []
     finalodd = []
-    print(numbers)
-    for n in numbers:
-        print(f'-------orig:{n}---------')
-        c=tpr(n, epsilon, "even", device)
-        d=tpr(n, epsilon, "odd", device)
-        print(f'tpr_even:{c}, tpr_odd:{d}')
-        finaleven.append(c)
-        finalodd.append(d)
-    print(finaleven)
-    print(finalodd)
-    '''
     t = torch.tensor(numbers).view(2,4,4)
-    print(f't orig:{t}')
+    start = time.time()
     orig_shape = t.size()
     t = t.view(-1)
-    print(f't:{t}')
+    for n in t:
+        c=tpr(n, epsilon, "even", device)
+        d=tpr(n, epsilon, "odd", device)
+        finaleven.append(c)
+        finalodd.append(d)
+    end = time.time()
+    print('first:')
+    print(end - start)
+
+    print(torch.tensor(finaleven).view(orig_shape))
+    print(torch.tensor(finalodd).view(orig_shape))
+    '''
+    t = torch.tensor(numbers).view(2,4,4)
+    #print(f't orig:{t}')
+    orig_shape = t.size()
+    t = t.view(-1)
+    #print(f't:{t}')
     quantized = []
     for i in t:
         i = tpr(i, epsilon, "even", device)
         quantized.append(i)
-    print(f't:{t}')
-    print(f'quantized:{quantized}')
+    #print(f't:{t}')
+    #print(f'quantized:{quantized}')
     print(final)
     print(torch.tensor(quantized).view(orig_shape))
     '''
 
-
-
     x_data = torch.tensor(numbers)
+    start = time.time()
     e=tensortpr(x_data, epsilon, "even", device)
-    print(f'even:{e}')
     o=tensortpr(x_data, epsilon, "odd", device)
+    end = time.time()
+    print('second:')
+    print(end - start)
+    print(f'even:{e}')
     print(f'odd:{o}')
 
 if __name__ == '__main__':
