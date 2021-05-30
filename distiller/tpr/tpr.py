@@ -398,6 +398,7 @@ def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
     sign = torch.where(tensor < 0, ones*-1, ones)
     print(f'sign: {sign}')
     t = torch.where(tensor == 0, zeros, tensor)
+    track = torch.where(tensor == 0, ones, track)
     print(f't: {t}')
     t = t * 1.6
     print(f'1.6 x t: {t}')
@@ -406,29 +407,35 @@ def tensortpr(tensor, epsilon, rounding_mode, exp_given=None):
     ebit = log2t.floor()
     print(f'ebit: {ebit}')
     if rounding_mode=="even":
+        track = torch.zeros_like(tensor)
         ebit = (ebit / 2).floor()
         print(f'even ebit: {ebit}')
         log2t = (log2t / 2)
         print(f'even log2t: {log2t}')
         t = torch.where(ebit < -3, zeros, t)
+        track = torch.where(ebit < -3, ones, track)
         print(f't ebit < -3: {t}')
         t = torch.where(ebit >= 3, ones*64.0, t)
+        track = torch.where(ebit >= 3, ones, track)
         print(f't ebit >= 3: {t}')
         ebit = ebit - torch.eq(ebit,log2t).int()
         print(f'ebit torch.eq: {ebit}')
-        t = torch.pow(4.0, ebit)*sign
+        t = torch.where(track == 0, torch.pow(4.0, ebit)*sign, t)
         print(f't: {torch.where(tensor == 0, zeros, t)}')
         return torch.where(tensor == 0, zeros, t)
     else:
+        track = torch.zeros_like(tensor)
         t = torch.where(ebit < -7, zeros, t)
+        track = torch.where(ebit < -7, ones, track)
         print(f't ebit < -7: {t}')
         t = torch.where(ebit >= 5, ones*32.0, t)
+        track = torch.where(ebit >= 5, ones, track)
         print(f't ebit >= 5: {t}')
         ebit = ebit - torch.eq(ebit%2,zeros).int()
         print(f't ebit%2: {ebit}')
         ebit = ebit - torch.eq(ebit,log2t).int()*2
         print(f'ebit torch.eq: {ebit}')
-        t = torch.pow(2.0, ebit)*sign
+        t = torch.where(track == 0, torch.pow(2.0, ebit)*sign, t)
         print(f't: {torch.where(tensor == 0, zeros, t)}')
         return torch.where(tensor == 0, zeros, t)
 
