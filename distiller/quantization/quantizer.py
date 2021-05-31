@@ -224,7 +224,7 @@ class Quantizer(object):
             with a reference to 'new_relu1'. Any override configuration made specifically for 'self.relu2'
             will be ignored. A warning message will be shown.
         """
-        pdb.set_trace()
+        #pdb.set_trace()
         if self.prepared:
             raise RuntimeError('prepare_model can be called only once')
 
@@ -365,7 +365,7 @@ class Quantizer(object):
         """
         Quantize all parameters using self.param_quantization_fn (with the defined number of bits for each parameter)
         """
-        #pdb.set_trace()
+        pdb.set_trace()
         for ptq in self.params_to_quantize:
             q_param = self.param_quantization_fn(getattr(ptq.module, ptq.fp_attr_name), ptq)
             if self.train_with_fp_copy:
