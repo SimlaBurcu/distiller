@@ -240,8 +240,6 @@ class TPRConv2d(torch.nn.Conv2d):
 
     def forward(self, input):
         input = _Scale_down.apply(input, self.grad_scale)
-        #INT4
-        input = super().forward(input)
         input = _TPR.apply(input, self.weight, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
         input = _Scale_up.apply(input, self.grad_scale)
