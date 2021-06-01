@@ -241,7 +241,7 @@ def test():
 
         #pdb.set_trace()
         o = y_pred(x)
-        loss = sum(o)
+        loss = o.sum()
         loss.backward()
         pdb.set_trace()
 
