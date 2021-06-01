@@ -215,10 +215,8 @@ class _TPR(torch.autograd.Function):
         grad_input = grad_weight = None
 
         even,odd=tensortpr2(grad_output)
-        if ctx.needs_input_grad[0]:
-            grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even, stride, padding, dilation, groups)
-        if ctx.needs_input_grad[1]:
-            grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
+        grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even, stride, padding, dilation, groups)
+        grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = odd.sum((0,2,3)).squeeze(0)
         print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
