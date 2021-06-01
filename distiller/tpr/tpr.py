@@ -185,7 +185,9 @@ class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w):
         ctx.save_for_backward(x, w)
-        return x
+        out = F.conv2d(x, w, self.bias, self.stride,
+                        self.padding, self.dilation, self.groups)
+        return out
 
     @staticmethod
     def backward(ctx, grad_output):
@@ -494,5 +496,6 @@ def gradtest():
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
     #test_function_returns_input()
-    test_autograd()
+    #test_autograd()
     #gradtest()
+    test()
