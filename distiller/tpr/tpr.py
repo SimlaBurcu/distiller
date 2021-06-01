@@ -446,7 +446,7 @@ def test_autograd():
             #grad_output.requires_grad = True
             with torch.enable_grad():
                 grad_output = tpr.apply(grad_output, torch.tensor(1.0, requires_grad=False))
-                grad_input , grad_weight = torch.autograd.grad(grad_output,(input, weight))
+                grad_input , grad_weight = torch.autograd.grad(grad_output,(input, weight), allow_unused = True)
 
                 grad_input = 100*grad_input
                 grad_weight = 10*grad_weight
