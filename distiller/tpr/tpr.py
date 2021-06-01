@@ -185,8 +185,7 @@ class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
         ctx.save_for_backward(x, w)
-        out = F.conv2d(x, w, self.bias, self.stride,
-                        self.padding, self.dilation, self.groups)
+        out = F.conv2d(x, w, bias, stride, padding, dilation, groups)
         return out
 
     @staticmethod
@@ -218,7 +217,8 @@ class TPRConv2d(torch.nn.Conv2d):
         input = _Scale_down.apply(input, self.grad_scale)
         #INT4
         input = super().forward(input)
-        input = _TPR.apply(input, self.weight)
+        input = _TPR.apply(input, self.weight, self.bias, self.stride,
+                        self.padding, self.dilation, self.groups)
         input = _Scale_up.apply(input, self.grad_scale)
 
         if self.bias is not None:
