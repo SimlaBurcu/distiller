@@ -322,12 +322,19 @@ class TestAutograd(unittest.TestCase):
 
         for shape in [(1,), ()]:
             v = torch.ones(shape, requires_grad=True)
+            print(f'v: {v}')
             MyFunction.apply(v).backward()
+            print(f'v: {v}')
+            print(f'v.grad: {v.grad}')
+            print(f'full: {torch.full(shape, 2.)}')
             self.assertEqual(v.grad, torch.full(shape, 2.))
 
             with torch.no_grad():
                 v.grad.zero_()
             MyFunction.apply(v.clone()).backward()
+            print(f'v: {v}')
+            print(f'v.grad: {v.grad}')
+            print(f'full: {torch.full(shape, 2.)}')
             self.assertEqual(v.grad, torch.full(shape, 2.))
 
 
