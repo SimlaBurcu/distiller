@@ -440,7 +440,7 @@ def test_autograd():
 
         @staticmethod
         def backward(ctx, grad_output):
-            #pdb.set_trace()
+            pdb.set_trace()
             print(f'tpr2 backward input:{grad_output}')
             input, weight = ctx.saved_tensors
             grad_output.requires_grad = True
