@@ -493,4 +493,5 @@ def gradtest():
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
     #test_function_returns_input()
-    gradtest()
+    test_autograd()
+    #gradtest()
