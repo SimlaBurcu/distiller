@@ -311,7 +311,7 @@ def test_float_to_fp4():
 import unittest
 class TestAutograd(unittest.TestCase):
     def test_function_returns_input(self):
-        class MyFunction(Function):
+        class MyFunction(torch.autograd.Function):
             @staticmethod
             def forward(ctx, x):
                 return x
