@@ -168,7 +168,7 @@ class _Scale_down(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad):
         grad_scale = ctx.grad_scale
-        return grad_output / grad_scale
+        return grad / grad_scale
 
 class _Scale_up(torch.autograd.Function):
     @staticmethod
@@ -179,7 +179,7 @@ class _Scale_up(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad):
         grad_scale = ctx.grad_scale
-        return grad_output * grad_scale
+        return grad * grad_scale
 
 class _TPR(torch.autograd.Function):
     @staticmethod
