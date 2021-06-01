@@ -350,6 +350,7 @@ class TestAutograd(unittest.TestCase):
         # backward tasks to the queue. We want to ensure all the reentrant tasks
         # are prioritized over the MyFunction backward task regardless of their
         # sequence numbers
+        print(order)
         self.assertEqual(len(order), 11)
         self.assertEqual(order.count("Reentrant"), 10)
         self.assertEqual(order[-1], "MyFunction")
