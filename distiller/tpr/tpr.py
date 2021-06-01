@@ -431,11 +431,29 @@ def test_autograd():
             print(f'tpr backward output:{grad_input}, {grad_weight}')
             return grad_input, grad_weight
 
+
+    class tpr2(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, x, w):
+            ctx.save_for_backward(x, w)
+            return x
+
+        @staticmethod
+        def backward(ctx, grad_output):
+            print(f'tpr2 backward input:{grad_output}')
+            input, weight = ctx.saved_tensors
+            grad_input , grad_weight = tpr.apply(grad_output, None).backward()
+
+            grad_input = 100*grad_input
+            grad_weight = 10*grad_weight
+            print(f'tpr2 backward output:{grad_input}, {grad_weight}')
+            return grad_input, grad_weight
+
     input = torch.tensor(6.0, requires_grad=True)
     print(f'main: {input}')
     input = down.apply(input, torch.tensor(3.0, requires_grad=True))
     print(f'main down: {input}')
-    input = tpr.apply(input, torch.tensor(5.0, requires_grad=True))
+    input = tpr2.apply(input, torch.tensor(5.0, requires_grad=True))
     print(f'main tpr: {input}')
     input = up.apply(input, torch.tensor(3.0, requires_grad=True))
     print(f'main up: {input}')
