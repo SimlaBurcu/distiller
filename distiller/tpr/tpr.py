@@ -78,14 +78,15 @@ def tensortpr2(tensor, epsilon, exp_given=None):
     odd = torch.where(tensor == 0, zeros, t)
     return even,odd
 
-def _get_op_name(name):
+def _get_op_name(name, **kwargs):
     """
-    Returns the operation's name that is performed in BFP format
+    Returns the operation's name that is performed in tpr format
     """
     return  'FP4_%s' % (name)
 
-def _gen_tpr_op(op, name):
-    name = _get_op_name(name)
+def _gen_tpr_op(op, name, **kwargs):
+    name = _get_op_name(name, **kwargs)
+    tpr_args = unpack_bfp_args(kwargs)
 
     class NewOpIn(torch.autograd.Function):
         @staticmethod
@@ -128,17 +129,79 @@ def _gen_tpr_op(op, name):
     return new_op
 
 _tpr_ops = {}
-def _get_tpr_op(op, name):
+def _get_tpr_op(op, name, tpr_args):
     """
-    Create the bfp version of the operation op
-    This function is called when a bfp layer is defined. See BFPConv2d and BFPLinear below
+    Create the tpr version of the operation op
+    This function is called when a tpr layer is defined. See tprConv2d and tprLinear below
     """
-    op_name = _get_op_name(name)
+    op_name = _get_op_name(name, **tpr_args)
     if op_name not in _tpr_ops:
-        _tpr_ops[name] = _gen_tpr_op(op, name)
+        _tpr_ops[name] = _gen_tpr_op(op, name, tpr_args)
 
     return _tpr_ops[name]
 
+
+def unpack_tpr_args(kwargs):
+    """
+    Set up the tpr arguments
+    """
+    tpr_args = {}
+    tpr_argn = [('num_format', 'fp32'),
+                ('rounding_mode', 'stoc'),
+                ('epsilon', 1e-8),
+                ('init_grad_scale', 1.0)]
+
+    for arg, default in tpr_argn:
+        if arg in kwargs:
+            tpr_args[arg] = kwargs[arg]
+            del kwargs[arg]
+        else:
+            tpr_args[arg] = default
+    return tpr_args
+
+class _Scale_down(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, w, grad_scale):
+        ctx.save_for_backward(x, w)
+        ctx.grad_scale = grad_scale
+        return x / grad_scale
+
+    @staticmethod
+    def backward(ctx, grad):
+        grad_scale = ctx.grad_scale
+        return grad_output / grad_scale
+
+class _Scale_up(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, w, grad_scale):
+        ctx.save_for_backward(x, w)
+        ctx.grad_scale = grad_scale
+        return x * grad_scale
+
+    @staticmethod
+    def backward(ctx, grad):
+        grad_scale = ctx.grad_scale
+        return grad_output * grad_scale
+
+class _TPR(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, w):
+        ctx.save_for_backward(x, w)
+        return x, w
+
+    @staticmethod
+    def backward(ctx, grad):
+        scale = ctx.grad_scale
+        input, weight = ctx.saved_tensors
+        grad_input = grad_weight = None
+
+        grad_output = grad_output * scale
+        even,odd=tensortpr2(grad_output, epsilon, device)
+        if ctx.needs_input_grad[0]:
+            grad_input = even.mm(weight)
+        if ctx.needs_input_grad[1]:
+            grad_weight = odd.t().mm(input)
+        return grad_input, grad_weight
 
 class TPRConv2d(torch.nn.Conv2d):
     """
@@ -147,17 +210,23 @@ class TPRConv2d(torch.nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, dilation=1, groups=1, bias=True, **kwargs):
 
+        grad_scale = kwargs.pop("grad_scale", 1.0)
         super().__init__(in_channels, out_channels, kernel_size, stride,
-                         padding, dilation, groups, bias)
-        self.conv_op = _get_tpr_op(F.conv2d, 'Conv2d')
+                         padding, dilation, groups, bias, **kwargs)
+        #tpr_args = unpack_bfp_args(kwargs)
+        self.grad_scale = grad_scale
 
     def forward(self, input):
-        conv = self.conv_op(input, self.weight, None, self.stride,
-                                self.padding, self.dilation, self.groups)
+        input = _Scale_down.apply(input, self.grad_scale)
+        #INT4
+        input = super().forward(input)
+        input, _ = _TPR.apply(input, self.weight)
+        input = _Scale_up.apply(input, self.grad_scale)
+
         if self.bias is not None:
-            return conv + self.bias
+            return input + self.bias
         else:
-            return conv
+            return input
 def test():
     dtype = torch.float
     device = torch.device("cuda:0")
@@ -172,7 +241,7 @@ def test():
 
         optimizer.zero_grad()
 
-        pdb.set_trace()
+        #pdb.set_trace()
         o = y_pred(x)
         print(f'o: {o}')
         loss = (o - y).pow(2).sum()
@@ -188,8 +257,8 @@ def test():
 def test_float_to_fp4():
     """
     Generate random fp32 tensors
-    Convert them to bfp
-    Check if the converted values are contained in the possible bfp numbers
+    Convert them to tpr
+    Check if the converted values are contained in the possible tpr numbers
     """
     dtype = torch.float
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
