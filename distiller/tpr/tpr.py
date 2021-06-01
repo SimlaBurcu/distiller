@@ -184,20 +184,19 @@ class _Scale_up(torch.autograd.Function):
 class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
-        ctx.save_for_backward(x, w)
-        out = F.conv2d(x, w, bias, stride, padding, dilation, groups)
-        return out
+        ctx.save_for_backward(x, w, bias)
+        return F.conv2d(x, w, bias, stride, padding, dilation, groups)
 
     @staticmethod
     def backward(ctx, grad_output):
-        input, weight = ctx.saved_tensors
+        input, weight, bias = ctx.saved_tensors
         grad_input = grad_weight = None
 
         even,odd=tensortpr2(grad_output)
         if ctx.needs_input_grad[0]:
-            grad_input = even.mm(weight)
+            grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even)
         if ctx.needs_input_grad[1]:
-            grad_weight = odd.t().mm(input)
+            grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd)
         return grad_input, grad_weight
 
 class TPRConv2d(torch.nn.Conv2d):
