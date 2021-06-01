@@ -313,7 +313,7 @@ class TestAutograd(unittest.TestCase):
     def test_reentrant_priority(self):
         order = []
 
-        class MyFunction(Function):
+        class MyFunction(torch.autograd.Function):
             @staticmethod
             def forward(ctx, x):
                 return x
@@ -323,7 +323,7 @@ class TestAutograd(unittest.TestCase):
                 order.append("MyFunction")
                 return x
 
-        class Reentrant(Function):
+        class Reentrant(torch.autograd.Function):
             @staticmethod
             def forward(ctx, x):
                 with torch.enable_grad():
