@@ -38,7 +38,7 @@ import unittest
 import math
 import time
 
-def tensortpr2(tensor, epsilon, exp_given=None):
+def tensortpr2(tensor):
     """
     Convert float tensor t to fp4
     """
@@ -111,7 +111,7 @@ def _gen_tpr_op(op, name, **kwargs):
             input, weight = ctx.saved_tensors
             grad_input = grad_weight = grad_bias = None
 
-            even,odd=tensortpr2(grad_output, epsilon, device)
+            even,odd=tensortpr2(grad_output, device)
             if ctx.needs_input_grad[0]:
                 grad_input = even.mm(weight)
             if ctx.needs_input_grad[1]:
@@ -192,7 +192,7 @@ class _TPR(torch.autograd.Function):
         input, weight = ctx.saved_tensors
         grad_input = grad_weight = None
 
-        even,odd=tensortpr2(grad_output, epsilon, device)
+        even,odd=tensortpr2(grad_output)
         if ctx.needs_input_grad[0]:
             grad_input = even.mm(weight)
         if ctx.needs_input_grad[1]:
