@@ -451,9 +451,9 @@ def test_autograd():
                 grad_input , grad_weight = grad_output.backward()
                 print(f'grad calc:{grad_input}, {grad_weight}')
                 '''
-                y = input ** 2
-                t,k = torch.autograd.grad(y, input, grad_output)
-                print(f'grad calc:{y}, {input}, {grad_output}, {t}, {k}')
+                y = input ** 5
+                t = torch.autograd.grad(y, input, grad_output)
+                print(f'grad calc:{y}, {input}, {grad_output}, {t}')
 
                 grad_input = 100*grad_input
                 grad_weight = 10*grad_weight
