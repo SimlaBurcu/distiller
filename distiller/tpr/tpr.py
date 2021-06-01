@@ -185,19 +185,30 @@ class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
         ctx.save_for_backward(x, w, bias)
+        ctx.stride = stride
+        ctx.padding = padding
+        ctx.dilation = dilation
+        ctx.groups = groups
         return F.conv2d(x, w, bias, stride, padding, dilation, groups)
 
     @staticmethod
     def backward(ctx, grad_output):
         input, weight, bias = ctx.saved_tensors
+        stride = ctx.stride
+        padding = ctx.padding
+        dilation = ctx.dilation
+        groups = ctx.groups
+        grad_input = grad_weight = grad_bias = None
         grad_input = grad_weight = None
 
         even,odd=tensortpr2(grad_output)
         if ctx.needs_input_grad[0]:
-            grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even)
+            grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even, stride, padding, dilation, groups)
         if ctx.needs_input_grad[1]:
-            grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd)
-        return grad_input, grad_weight
+            grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
+        if bias is not None and ctx.needs_input_grad[2]:
+            grad_bias = odd.sum((0,2,3)).squeeze(0)
+         return grad_input, grad_weight, grad_bias, None, None, None, None
 
 class TPRConv2d(torch.nn.Conv2d):
     """
