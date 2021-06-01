@@ -439,7 +439,7 @@ def test_autograd():
     print(f'main tpr: {input}')
     input = up.apply(input, torch.tensor(3.0, requires_grad=True))
     print(f'main up: {input}')
-
+    input.backward()
 
 
 if __name__ == '__main__':
