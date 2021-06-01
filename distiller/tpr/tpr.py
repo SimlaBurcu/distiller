@@ -208,8 +208,9 @@ class _TPR(torch.autograd.Function):
             grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = odd.sum((0,2,3)).squeeze(0)
-         return grad_input, grad_weight, grad_bias, None, None, None, None
+        return grad_input, grad_weight, grad_bias, None, None, None, None
 
+        
 class TPRConv2d(torch.nn.Conv2d):
     """
     tpr convolutional layer
