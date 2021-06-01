@@ -440,7 +440,7 @@ def test_autograd():
 
         @staticmethod
         def backward(ctx, grad_output):
-            pdb.set_trace()
+            #pdb.set_trace()
             print(f'tpr2 backward input:{grad_output}')
             input, weight = ctx.saved_tensors
             grad_output.requires_grad = True
@@ -466,8 +466,27 @@ def test_autograd():
     print(f'main up: {input}')
     input.backward()
 
+def gradtest():
+    class exampleFct(torch.autograd.Function):
+        @staticmethod
+        def forward(self, x):
+            self.save_for_backward(x)
+            return x ** 2
+
+        @staticmethod
+        def backward(self, dy):
+            x, = self.saved_variables
+            with torch.enable_grad():
+                y = x ** 2
+                return torch.autograd.grad(y, x, dy)
+
+
+    x = torch.tensor([[3, 4]], requires_grad=True)
+    m = exampleFct.apply(x).sum().backward()
+    print(x.grad.data)
+
 
 if __name__ == '__main__':
     #unittest.main(verbosity=2)
     #test_function_returns_input()
-    test_autograd()
+    gradtest()
