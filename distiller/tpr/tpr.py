@@ -250,8 +250,6 @@ class TPRConv2d(torch.nn.Conv2d):
             return input + self.bias
         else:
             return input
-
-from torch.autograd import gradcheck
 def test():
     dtype = torch.float
     device = torch.device("cuda:0")
@@ -260,7 +258,7 @@ def test():
 
     y_pred.cuda()
 
-    x = torch.randn(4, 4, 5, 10, device=device)
+    x = torch.randn(4, 4, 1, 2, device=device)
     y = torch.randn(4, 4, 28, 100, device=device)
 
     optimizer.zero_grad()
@@ -271,12 +269,6 @@ def test():
     loss.backward()
 
 
-    # gradcheck takes a tuple of tensors as input, check if your gradient
-    # evaluated with these tensors are close enough to numerical
-    # approximations and returns True if they all verify this condition.
-    input = (torch.randn(20,20,dtype=torch.double,requires_grad=True), torch.randn(30,20,dtype=torch.double,requires_grad=True))
-    test = gradcheck(_TPR, input, eps=1e-6, atol=1e-4)
-    print(test)
 
 def test_float_to_fp4():
     """
