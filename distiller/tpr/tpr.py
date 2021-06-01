@@ -448,6 +448,8 @@ def test_autograd():
                 grad_output = tpr.apply(grad_output, torch.tensor(1.0, requires_grad=False))
                 grad_input , grad_weight = torch.autograd.grad(grad_output,(input, weight), allow_unused = True)
 
+                print(f'grad calc:{grad_input}, {grad_weight}')
+
                 grad_input = 100*grad_input
                 grad_weight = 10*grad_weight
                 print(f'tpr2 backward output:{grad_input}, {grad_weight}')
