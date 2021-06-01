@@ -447,7 +447,7 @@ def test_autograd():
             with torch.enable_grad():
                 grad_output = tpr.apply(grad_output, torch.tensor(1.0, requires_grad=False))
                 print(f'grad_output:{grad_output}')
-                grad_input , grad_weight = torch.autograd.grad(grad_output,(input, weight), allow_unused = True)
+                grad_input , grad_weight = grad_output.backward()
 
                 print(f'grad calc:{grad_input}, {grad_weight}')
 
