@@ -308,6 +308,29 @@ def test_float_to_fp4():
     print(f'even: {e}, odd: {o}')
 
 
+import unittest
+class TestAutograd(TestCase):
+    def test_function_returns_input(self):
+        class MyFunction(Function):
+            @staticmethod
+            def forward(ctx, x):
+                return x
+
+            @staticmethod
+            def backward(ctx, grad):
+                return grad * 2
+
+        for shape in [(1,), ()]:
+            v = torch.ones(shape, requires_grad=True)
+            MyFunction.apply(v).backward()
+            self.assertEqual(v.grad, torch.full(shape, 2.))
+
+            with torch.no_grad():
+                v.grad.zero_()
+            MyFunction.apply(v.clone()).backward()
+            self.assertEqual(v.grad, torch.full(shape, 2.))
+
+
 if __name__ == '__main__':
-    #unittest.main(verbosity=2)
-    test()
+    unittest.main(verbosity=2)
+    #test_function_returns_input()
