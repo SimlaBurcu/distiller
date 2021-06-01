@@ -433,11 +433,11 @@ def test_autograd():
 
     input = torch.tensor(6.0, requires_grad=True)
     print(f'main: {input}')
-    input = down.apply(input, 3)
+    input = down.apply(input, torch.tensor(3.0, requires_grad=True))
     print(f'main down: {input}')
-    input = tpr.apply(input, 5)
+    input = tpr.apply(input, torch.tensor(5.0, requires_grad=True))
     print(f'main tpr: {input}')
-    input = up.apply(input, 3)
+    input = up.apply(input, torch.tensor(3.0, requires_grad=True))
     print(f'main up: {input}')
 
 
