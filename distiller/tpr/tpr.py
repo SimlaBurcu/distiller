@@ -327,7 +327,7 @@ class TestAutograd(unittest.TestCase):
             @staticmethod
             def forward(ctx, x):
                 with torch.enable_grad():
-                    ctx.x = torch.Variable(x.detach(), requires_grad=True)
+                    ctx.x = torch.autograd.Variable(x.detach(), requires_grad=True)
                     ctx.x = ctx.x - 1
                 return ctx.x.detach()
 
