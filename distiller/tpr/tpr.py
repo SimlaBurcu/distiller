@@ -168,7 +168,7 @@ class _Scale_down(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad):
         grad_scale = ctx.grad_scale
-        return grad / grad_scale
+        return grad / grad_scale, None
 
 class _Scale_up(torch.autograd.Function):
     @staticmethod
@@ -179,16 +179,16 @@ class _Scale_up(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad):
         grad_scale = ctx.grad_scale
-        return grad * grad_scale
+        return grad * grad_scale, None
 
 class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w):
         ctx.save_for_backward(x, w)
-        return x, w
+        return x
 
     @staticmethod
-    def backward(ctx, grad):
+    def backward(ctx, grad_output):
         scale = ctx.grad_scale
         input, weight = ctx.saved_tensors
         grad_input = grad_weight = None
@@ -218,7 +218,7 @@ class TPRConv2d(torch.nn.Conv2d):
         input = _Scale_down.apply(input, self.grad_scale)
         #INT4
         input = super().forward(input)
-        input, _ = _TPR.apply(input, self.weight)
+        input = _TPR.apply(input, self.weight)
         input = _Scale_up.apply(input, self.grad_scale)
 
         if self.bias is not None:
