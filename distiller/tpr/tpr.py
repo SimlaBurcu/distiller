@@ -445,11 +445,15 @@ def test_autograd():
             input, weight = ctx.saved_tensors
             grad_output.requires_grad = True
             with torch.enable_grad():
+                '''
                 grad_output = tpr.apply(grad_output, torch.tensor(1.0, requires_grad=False))
                 print(f'grad_output:{grad_output}')
                 grad_input , grad_weight = grad_output.backward()
-
                 print(f'grad calc:{grad_input}, {grad_weight}')
+                '''
+                y = input ** 2
+                t = torch.autograd.grad(y, input, grad_output)
+                print(f'grad calc:{y}, {input}, {grad_output}, {t}')
 
                 grad_input = 100*grad_input
                 grad_weight = 10*grad_weight
