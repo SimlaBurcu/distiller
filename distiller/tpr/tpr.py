@@ -228,14 +228,14 @@ class TPRConv2d(torch.nn.Conv2d):
 def test():
     dtype = torch.float
     device = torch.device("cuda:0")
-    y_pred = TPRConv2d(20, 33, (3, 5), bias = None, stride=(2, 1), padding=(4, 2))
+    y_pred = TPRConv2d(16, 16, (3, 5), bias = None, stride=(2, 1), padding=(4, 2))
     optimizer = SGD(y_pred.parameters(), lr=0.1)
 
     y_pred.cuda()
 
     for t in range(100):
-        x = torch.randn(20, 16, 50, 100, device=device)
-        y = torch.randn(20, 16, 28, 100, device=device)
+        x = torch.randn(16, 16, 50, 100, device=device)
+        y = torch.randn(16, 16, 28, 100, device=device)
 
         optimizer.zero_grad()
 
