@@ -309,7 +309,7 @@ def test_float_to_fp4():
 
 
 import unittest
-class TestAutograd(TestCase):
+class TestAutograd(unittest.TestCase):
     def test_function_returns_input(self):
         class MyFunction(Function):
             @staticmethod
