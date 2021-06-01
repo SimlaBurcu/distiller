@@ -241,16 +241,9 @@ def test():
 
         #pdb.set_trace()
         o = y_pred(x)
-        print(f'o: {o}')
-        loss = (o - y).pow(2).sum()
-        print(f'loss: {loss}')
-
-        # Compute and print loss
+        loss = o
         loss.backward()
         pdb.set_trace()
-        optimizer.step()
-
-        print(loss.item())
 
 def test_float_to_fp4():
     """
