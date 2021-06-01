@@ -354,7 +354,7 @@ class TestAutograd(unittest.TestCase):
         self.assertEqual(len(order), 11)
         self.assertEqual(order.count("Reentrant"), 10)
         self.assertEqual(order[-1], "MyFunction")
-    '''
+
     def test_function_returns_input(self):
         class MyFunction(torch.autograd.Function):
             @staticmethod
@@ -381,8 +381,48 @@ class TestAutograd(unittest.TestCase):
             print(f'v.grad: {v.grad}')
             print(f'full: {torch.full(shape, 2.)}')
             self.assertEqual(v.grad, torch.full(shape, 2.))
-    '''
+
+def test_autograd():
+    order = []
+
+    class MyFunction(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, x):
+            order.append(f"MyFunction forward:{x}")
+            return x
+
+        @staticmethod
+        def backward(ctx, x):
+            order.append(f"MyFunction backward:{x}")
+            return x
+
+    class Reentrant(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, x):
+            order.append(f"Reentrant forward:{x}")
+            with torch.enable_grad():
+                ctx.x = torch.autograd.Variable(x.detach(), requires_grad=True)
+                ctx.x = ctx.x - 1
+            return ctx.x.detach()
+
+        @staticmethod
+        def backward(ctx, x):
+            order.append(f"Reentrant backward:{x}")
+            if ctx.x < 0:
+                return x
+            with torch.enable_grad():
+                Reentrant.apply(ctx.x).backward()
+            return x
+
+    a = MyFunction.apply(torch.tensor(6.0, requires_grad=True))
+    b = Reentrant.apply(torch.tensor(9.0, requires_grad=True))
+    v = a * b
+    v.backward()
+
+    print(order)
+
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    #unittest.main(verbosity=2)
     #test_function_returns_input()
+    test_autograd()
