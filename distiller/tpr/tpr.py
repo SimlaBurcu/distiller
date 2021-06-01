@@ -383,43 +383,63 @@ class TestAutograd(unittest.TestCase):
             self.assertEqual(v.grad, torch.full(shape, 2.))
 
 def test_autograd():
-    order = []
 
-    class MyFunction(torch.autograd.Function):
+    class down(torch.autograd.Function):
         @staticmethod
-        def forward(ctx, x):
-            order.append(f"MyFunction forward:{x}")
+        def forward(ctx, x, grad_scale):
+            print(f'down forward input:{x}')
+            ctx.grad_scale = grad_scale
+            print(f'down forward output:{x / grad_scale}')
+            return x / grad_scale
+
+        @staticmethod
+        def backward(ctx, grad):
+            print(f'down backward input:{grad}')
+            grad_scale = ctx.grad_scale
+            print(f'down backward output:{grad / grad_scale}')
+            return grad / grad_scale, None
+
+    class up(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, x, grad_scale):
+            print(f'up forward input:{x}')
+            ctx.grad_scale = grad_scale
+            print(f'up forward output:{x * grad_scale}')
+            return x * grad_scale
+
+        @staticmethod
+        def backward(ctx, grad):
+            print(f'up backward input:{grad}')
+            grad_scale = ctx.grad_scale
+            print(f'up backward output:{grad * grad_scale}')
+            return grad * grad_scale, None
+
+    class tpr(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, x, w):
+            ctx.save_for_backward(x, w)
             return x
 
         @staticmethod
-        def backward(ctx, x):
-            order.append(f"MyFunction backward:{x}")
-            return x
+        def backward(ctx, grad_output):
+            print(f'tpr backward input:{grad_output}')
+            input, weight = ctx.saved_tensors
+            grad_input = grad_weight = None
 
-    class Reentrant(torch.autograd.Function):
-        @staticmethod
-        def forward(ctx, x):
-            order.append(f"Reentrant forward:{x}")
-            with torch.enable_grad():
-                ctx.x = torch.autograd.Variable(x.detach(), requires_grad=True)
-                ctx.x = ctx.x - 1
-            return ctx.x.detach()
+            grad_input = 100*weight
+            grad_weight = 10*input
+            print(f'tpr backward output:{grad_input}, {grad_weight}')
+            return grad_input, grad_weight
 
-        @staticmethod
-        def backward(ctx, x):
-            order.append(f"Reentrant backward:{x}")
-            if ctx.x < 0:
-                return x
-            with torch.enable_grad():
-                Reentrant.apply(ctx.x).backward()
-            return x
+    input = torch.tensor(6.0, requires_grad=True)
+    print(f'main: {input}')
+    input = down.apply(input, 3)
+    print(f'main down: {input}')
+    input = tpr.apply(input, 5)
+    print(f'main tpr: {input}')
+    input = up.apply(input, 3)
+    print(f'main up: {input}')
 
-    a = MyFunction.apply(torch.tensor(6.0, requires_grad=True))
-    b = Reentrant.apply(torch.tensor(9.0, requires_grad=True))
-    v = a * b
-    v.backward()
-
-    print(order)
 
 
 if __name__ == '__main__':
