@@ -161,8 +161,7 @@ def unpack_tpr_args(kwargs):
 
 class _Scale_down(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, x, w, grad_scale):
-        ctx.save_for_backward(x, w)
+    def forward(ctx, x, grad_scale):
         ctx.grad_scale = grad_scale
         return x / grad_scale
 
@@ -173,8 +172,7 @@ class _Scale_down(torch.autograd.Function):
 
 class _Scale_up(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, x, w, grad_scale):
-        ctx.save_for_backward(x, w)
+    def forward(ctx, x, grad_scale):
         ctx.grad_scale = grad_scale
         return x * grad_scale
 
