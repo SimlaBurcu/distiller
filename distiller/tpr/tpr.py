@@ -189,11 +189,9 @@ class _TPR(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        scale = ctx.grad_scale
         input, weight = ctx.saved_tensors
         grad_input = grad_weight = None
 
-        grad_output = grad_output * scale
         even,odd=tensortpr2(grad_output, epsilon, device)
         if ctx.needs_input_grad[0]:
             grad_input = even.mm(weight)
