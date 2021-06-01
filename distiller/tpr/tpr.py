@@ -481,7 +481,7 @@ def gradtest():
                 return torch.autograd.grad(y, x, dy)
 
 
-    x = torch.tensor([[3, 4]], requires_grad=True)
+    x = torch.tensor(5.0, requires_grad=True)
     m = exampleFct.apply(x).sum().backward()
     print(x.grad.data)
 
