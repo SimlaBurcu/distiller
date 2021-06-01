@@ -365,7 +365,7 @@ class Quantizer(object):
         """
         Quantize all parameters using self.param_quantization_fn (with the defined number of bits for each parameter)
         """
-        pdb.set_trace()
+        #pdb.set_trace()
         for ptq in self.params_to_quantize:
             q_param = self.param_quantization_fn(getattr(ptq.module, ptq.fp_attr_name), ptq)
             if self.train_with_fp_copy:
