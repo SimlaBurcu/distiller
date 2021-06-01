@@ -443,6 +443,7 @@ def test_autograd():
             #pdb.set_trace()
             print(f'tpr2 backward input:{grad_output}')
             input, weight = ctx.saved_tensors
+            grad_output.requires_grad = True
             with torch.enable_grad():
                 grad_input , grad_weight = tpr.apply(grad_output, torch.tensor(1.0, requires_grad=False)).backward()
 
