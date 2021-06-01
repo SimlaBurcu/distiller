@@ -169,7 +169,7 @@ class _Scale_down(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad):
-        print(f'_Scale_down backward input:{grad}, {grad_scale}')
+        print(f'_Scale_down backward input:{grad}')
         grad_scale = ctx.grad_scale
         print(f'_Scale_down backward output:{grad / grad_scale}')
         return grad / grad_scale, None
@@ -184,7 +184,7 @@ class _Scale_up(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad):
-        print(f'_Scale_up backward input:{grad}, {grad_scale}')
+        print(f'_Scale_up backward input:{grad}')
         grad_scale = ctx.grad_scale
         print(f'_Scale_up backward output:{grad * grad_scale}')
         return grad * grad_scale, None
@@ -253,13 +253,13 @@ class TPRConv2d(torch.nn.Conv2d):
 def test():
     dtype = torch.float
     device = torch.device("cuda:0")
-    y_pred = TPRConv2d(16, 16, (3, 5), bias = None, stride=(2, 1), padding=(4, 2))
+    y_pred = TPRConv2d(4, 4, (3, 5), bias = None, stride=(2, 1), padding=(4, 2))
     optimizer = SGD(y_pred.parameters(), lr=0.1)
 
     y_pred.cuda()
 
-    x = torch.randn(16, 16, 50, 100, device=device)
-    y = torch.randn(16, 16, 28, 100, device=device)
+    x = torch.randn(4, 4, 5, 10, device=device)
+    y = torch.randn(4, 4, 28, 100, device=device)
 
     optimizer.zero_grad()
 
