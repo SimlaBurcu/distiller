@@ -32,6 +32,7 @@ from distiller.utils import set_model_input_shape_attr, model_setattr
 from distiller.modules import Mean, EltwiseAdd
 
 import logging
+import pdb
 msglogger = logging.getLogger()
 
 SUPPORTED_DATASETS = ('imagenet', 'cifar10', 'mnist')
@@ -139,10 +140,10 @@ def create_model(pretrained, dataset, arch, parallel=True, device_ids=None):
 
     msglogger.info("=> created a %s%s model with the %s dataset" % ('pretrained ' if pretrained else '',
                                                                      arch, dataset))
+    pdb.set_trace()
     if torch.cuda.is_available() and device_ids != -1:
         device = 'cuda'
         if parallel:
-            print(f'PARALLEL WITH {device_ids}')
             if arch.startswith('alexnet') or arch.startswith('vgg'):
                 model.features = torch.nn.DataParallel(model.features, device_ids=device_ids)
             else:
