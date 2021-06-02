@@ -142,6 +142,7 @@ def create_model(pretrained, dataset, arch, parallel=True, device_ids=None):
     if torch.cuda.is_available() and device_ids != -1:
         device = 'cuda'
         if parallel:
+            print(f'PARALLEL WITH {device_ids}')
             if arch.startswith('alexnet') or arch.startswith('vgg'):
                 model.features = torch.nn.DataParallel(model.features, device_ids=device_ids)
             else:
