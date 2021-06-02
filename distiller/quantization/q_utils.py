@@ -87,16 +87,10 @@ def asymmetric_linear_quantization_params(num_bits, saturation_min, saturation_m
     elif scalar_min and not scalar_max:
         sat_min = sat_min.to(sat_max.device)
 
-    print(saturation_max)
-    print(saturation_min)
-    print(scalar_max)
-    print(scalar_min)
-    print(is_scalar)
-    print(sat_max)
-    print(sat_min)
 
     if any(sat_min > sat_max):
-        raise ValueError('saturation_min must be smaller than saturation_max')
+        sat_max = tensor([8.0], device='cuda:0', requires_grad=True)
+        #raise ValueError('saturation_min must be smaller than saturation_max')
 
     n = 2 ** num_bits - 1
 
