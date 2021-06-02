@@ -89,7 +89,7 @@ def asymmetric_linear_quantization_params(num_bits, saturation_min, saturation_m
 
 
     if any(sat_min > sat_max):
-        sat_max = tensor([8.0], device='cuda:0', requires_grad=True)
+        sat_max = torch.tensor([8.0], device='cuda:0', requires_grad=True)
         #raise ValueError('saturation_min must be smaller than saturation_max')
 
     n = 2 ** num_bits - 1
