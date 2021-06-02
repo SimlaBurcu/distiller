@@ -57,10 +57,7 @@ def _gen_tpr_optim(optim, name):
             super().__init__(*args, **kwargs)
 
         def step(self, *args, **kwargs):
-            for group in self.param_groups:
-                for p in group['params']:
-                    print(p)
-            pdb.set_trace()
+            print(self.param_groups[-1])
             loss = super().step(*args, **kwargs)
 
             return loss
