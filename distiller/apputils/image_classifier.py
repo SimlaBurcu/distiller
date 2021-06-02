@@ -673,6 +673,10 @@ def train(train_loader, model, criterion, optimizer, epoch,
         loss.backward()
         if compression_scheduler:
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
+
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                param.grad = param.grad + 61
         optimizer.step()
         if compression_scheduler:
             compression_scheduler.on_minibatch_end(epoch, train_step, steps_per_epoch, optimizer)
