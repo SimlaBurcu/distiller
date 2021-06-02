@@ -239,7 +239,7 @@ class TPRConv2d(torch.nn.Conv2d):
         self.g_scale = g_scale
 
     def forward(self, input):
-        pdb.set_trace()
+        #pdb.set_trace()
         input = _Scale_down.apply(input, self.grad_scale)
         input = _TPR.apply(input, self.weight, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)

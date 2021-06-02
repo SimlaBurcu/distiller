@@ -674,7 +674,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
         if compression_scheduler:
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
 
-        pdb.set_trace()
+        #pdb.set_trace()
         def get_children(model: torch.nn.Module):
             # get children form model!
             children = list(model.children())
