@@ -78,7 +78,6 @@ def symmetric_linear_quantization_params(num_bits, saturation_val, restrict_qran
 
 def asymmetric_linear_quantization_params(num_bits, saturation_min, saturation_max,
                                           integral_zero_point=True, signed=False):
-    pdb.set_trace()
     scalar_min, sat_min = _prep_saturation_val_tensor(saturation_min)
     scalar_max, sat_max = _prep_saturation_val_tensor(saturation_max)
     is_scalar = scalar_min and scalar_max
