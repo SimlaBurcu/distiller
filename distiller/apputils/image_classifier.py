@@ -37,6 +37,7 @@ from distiller.data_loggers import *
 import distiller.quantization as quantization
 import distiller.models as models
 from distiller.models import create_model
+from distiller.models.cifar10 import *
 from distiller.utils import float_range_argparse_checker as float_range
 import pdb
 
@@ -675,7 +676,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
 
         pdb.set_trace()
-        list = [module for module in model.modules() if not isinstance(module, torch.nn.Sequential)]
+        list = [module for module in model.modules() if not (isinstance(module, torch.nn.Sequential) or (isinstance(module, ResNetCifar)) or (isinstance(module, BasicBlock)]
 
         for name, param in model.named_parameters():
             if param.requires_grad:
