@@ -206,14 +206,13 @@ class _TPR(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad_output):
         #print(f'_TPR backward input:{grad_output}')
-        pdb.set_trace()
+        #pdb.set_trace()
         input, weight, bias = ctx.saved_tensors
         stride = ctx.stride
         padding = ctx.padding
         dilation = ctx.dilation
         groups = ctx.groups
         grad_input = grad_weight = grad_bias = None
-        grad_input = grad_weight = None
 
         even,odd=tensortpr2(grad_output)
         grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even, stride, padding, dilation, groups)
