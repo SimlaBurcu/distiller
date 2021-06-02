@@ -676,7 +676,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
 
         pdb.set_trace()
-        list = [module for module in model.modules() if not (isinstance(module, torch.nn.Sequential) or (isinstance(module, ResNetCifar)) or (isinstance(module, BasicBlock)]
+        list = [module for module in model.modules() if not (isinstance(module, torch.nn.Sequential) or (isinstance(module, ResNetCifar)) or (isinstance(module, BasicBlock))]
 
         for name, param in model.named_parameters():
             if param.requires_grad:
