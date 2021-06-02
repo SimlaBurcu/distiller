@@ -59,6 +59,7 @@ def _gen_tpr_optim(optim, name):
         def step(self, *args, **kwargs):
             print(self.param_groups[-1])
             loss = super().step(*args, **kwargs)
+            print(self.param_groups[-1])
 
             return loss
 
