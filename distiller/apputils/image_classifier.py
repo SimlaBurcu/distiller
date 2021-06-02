@@ -691,9 +691,14 @@ def train(train_loader, model, criterion, optimizer, epoch,
                         flatt_children.append(get_children(child))
             return flatt_children
         modellist = get_children(model)
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                param.grad = param.grad + 61
+        for layer in modellist:
+            if 'TPR' in str(layer):
+                g_scale = 0
+                if torch.max(layer.weight.grad)>64:
+                    g_scale = -1
+                if torch.max(layer.weight.grad)<=32:
+                    g_scale = 1
+                layer.grad_scale = layer.grad_scale * (2**g_scale)
         optimizer.step()
         if compression_scheduler:
             compression_scheduler.on_minibatch_end(epoch, train_step, steps_per_epoch, optimizer)
