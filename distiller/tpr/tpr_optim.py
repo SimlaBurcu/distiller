@@ -28,7 +28,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import torch
-from .tpr_ops import float_to_tpr_tiled, unpack_tpr_args
+from .tpr import unpack_tpr_args
 import pdb
 
 _tpr_optims = {}
