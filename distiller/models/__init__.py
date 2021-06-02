@@ -140,7 +140,7 @@ def create_model(pretrained, dataset, arch, parallel=True, device_ids=None):
 
     msglogger.info("=> created a %s%s model with the %s dataset" % ('pretrained ' if pretrained else '',
                                                                      arch, dataset))
-    pdb.set_trace()
+    #pdb.set_trace()
     if torch.cuda.is_available() and device_ids != -1:
         device = 'cuda'
         if parallel:
