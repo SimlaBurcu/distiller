@@ -365,6 +365,7 @@ def _config_compute_device(args):
         args.device = 'cpu'
         args.gpus = -1
     else:
+        print(f'gpus: {args.gpus}')
         args.device = 'cuda'
         if args.gpus is not None:
             try:
