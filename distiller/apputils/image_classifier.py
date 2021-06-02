@@ -674,6 +674,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
         if compression_scheduler:
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
 
+        pdb.set_trace()
         for name, param in model.named_parameters():
             if param.requires_grad:
                 param.grad = param.grad + 61
