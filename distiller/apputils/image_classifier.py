@@ -675,6 +675,8 @@ def train(train_loader, model, criterion, optimizer, epoch,
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
 
         pdb.set_trace()
+        list = [module for module in model.modules() if not isinstance(module, torch.nn.Sequential)]
+
         for name, param in model.named_parameters():
             if param.requires_grad:
                 param.grad = param.grad + 61
