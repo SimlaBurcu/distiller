@@ -604,6 +604,10 @@ def train(train_loader, model, criterion, optimizer, epoch,
         # Record loss
         losses[OBJECTIVE_LOSS_KEY].add(loss.item())
 
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                print(f'{name} {torch.cuda.current_device()}')
+
         if compression_scheduler:
             # Before running the backward phase, we allow the scheduler to modify the loss
             # (e.g. add regularization loss)
