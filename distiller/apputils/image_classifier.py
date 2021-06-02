@@ -604,10 +604,11 @@ def train(train_loader, model, criterion, optimizer, epoch,
         # Record loss
         losses[OBJECTIVE_LOSS_KEY].add(loss.item())
 
+        '''
         for name, param in model.named_parameters():
             if param.requires_grad:
                 print(f'{name} {torch.cuda.current_device()}')
-
+        '''
         if compression_scheduler:
             # Before running the backward phase, we allow the scheduler to modify the loss
             # (e.g. add regularization loss)
@@ -625,7 +626,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
 
         # Compute the gradient and do SGD step
         optimizer.zero_grad()
-        #pdb.set_trace()
+        pdb.set_trace()
         loss.backward()
         if compression_scheduler:
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
