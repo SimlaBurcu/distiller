@@ -37,7 +37,6 @@ from distiller.data_loggers import *
 import distiller.quantization as quantization
 import distiller.models as models
 from distiller.models import create_model
-from distiller.models.cifar10 import *
 from distiller.utils import float_range_argparse_checker as float_range
 import pdb
 
@@ -676,8 +675,22 @@ def train(train_loader, model, criterion, optimizer, epoch,
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
 
         pdb.set_trace()
-        list = [module for module in model.modules() if not (isinstance(module, torch.nn.Sequential) or (isinstance(module, ResNetCifar)) or (isinstance(module, BasicBlock)))]
-
+        def get_children(model: torch.nn.Module):
+            # get children form model!
+            children = list(model.children())
+            flatt_children = []
+            if children == []:
+                # if model has no children; model is last child! :O
+                return model
+            else:
+               # look for children from children... to the last child!
+               for child in children:
+                    try:
+                        flatt_children.extend(get_children(child))
+                    except TypeError:
+                        flatt_children.append(get_children(child))
+            return flatt_children
+        modellist = get_children(model)
         for name, param in model.named_parameters():
             if param.requires_grad:
                 param.grad = param.grad + 61
