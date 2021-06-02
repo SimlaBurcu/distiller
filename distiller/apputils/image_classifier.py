@@ -38,6 +38,7 @@ import distiller.quantization as quantization
 import distiller.models as models
 from distiller.models import create_model
 from distiller.utils import float_range_argparse_checker as float_range
+from distiller.tpr_optim import get_tpr_optim
 import pdb
 
 # Logger handle
@@ -408,7 +409,8 @@ def _init_learner(args):
             msglogger.info('\nreset_optimizer flag set: Overriding resumed optimizer and resetting epoch count to 0')
 
     if optimizer is None and not args.evaluate:
-        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr,
+        TPRSGD = get_tpr_optim(torch.optim.SGD, "SGD")
+        optimizer = TPRSGD(model.parameters(), lr=args.lr,
                                     momentum=args.momentum, weight_decay=args.weight_decay)
         msglogger.debug('Optimizer Type: %s', type(optimizer))
         msglogger.debug('Optimizer Args: %s', optimizer.defaults)

@@ -159,7 +159,68 @@ def unpack_tpr_args(kwargs):
             tpr_args[arg] = default
     return tpr_args
 
+class _Scale_down(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, grad_scale):
+        #print(f'_Scale_down forward input:{x}, {grad_scale}')
+        ctx.grad_scale = grad_scale
+        #print(f'_Scale_down forward output:{x / grad_scale}')
+        return x / grad_scale
 
+    @staticmethod
+    def backward(ctx, grad):
+        #print(f'_Scale_down backward input:{grad}')
+        grad_scale = ctx.grad_scale
+        #print(f'_Scale_down backward output:{grad / grad_scale}')
+        return grad / grad_scale, None
+
+class _Scale_up(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, grad_scale):
+        #print(f'_Scale_up forward input:{x}, {grad_scale}')
+        ctx.grad_scale = grad_scale
+        #print(f'_Scale_up forward output:{x * grad_scale}')
+        return x * grad_scale
+
+    @staticmethod
+    def backward(ctx, grad):
+        #print(f'_Scale_up backward input:{grad}')
+        grad_scale = ctx.grad_scale
+        #print(f'_Scale_up backward output:{grad * grad_scale}')
+        return grad * grad_scale, None
+
+class _TPR(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
+        #print(f'_TPR forward input:{x}, {w}')
+        ctx.save_for_backward(x, w, bias)
+        ctx.stride = stride
+        ctx.padding = padding
+        ctx.dilation = dilation
+        ctx.groups = groups
+        out = F.conv2d(x, w, bias, stride, padding, dilation, groups)
+        #print(f'_TPR forward output:{out}')
+        return out
+
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        #print(f'_TPR backward input:{grad_output}')
+        #pdb.set_trace()
+        input, weight, bias = ctx.saved_tensors
+        stride = ctx.stride
+        padding = ctx.padding
+        dilation = ctx.dilation
+        groups = ctx.groups
+        grad_input = grad_weight = grad_bias = None
+
+        even,odd=tensortpr2(grad_output)
+        grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even, stride, padding, dilation, groups)
+        grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
+        if bias is not None and ctx.needs_input_grad[2]:
+            grad_bias = odd.sum((0,2,3)).squeeze(0)
+        #print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
+        return grad_input, grad_weight, grad_bias, None, None, None, None
 
 
 class TPRConv2d(torch.nn.Conv2d):
@@ -178,71 +239,6 @@ class TPRConv2d(torch.nn.Conv2d):
         self.g_scale = g_scale
 
     def forward(self, input):
-        class _Scale_down(torch.autograd.Function):
-            @staticmethod
-            def forward(ctx, x, grad_scale):
-                #print(f'_Scale_down forward input:{x}, {grad_scale}')
-                ctx.grad_scale = grad_scale
-                #print(f'_Scale_down forward output:{x / grad_scale}')
-                return x / grad_scale
-
-            @staticmethod
-            def backward(ctx, grad):
-                #print(f'_Scale_down backward input:{grad}')
-                grad_scale = ctx.grad_scale
-                #print(f'_Scale_down backward output:{grad / grad_scale}')
-                return grad / grad_scale, None
-
-        class _Scale_up(torch.autograd.Function):
-            @staticmethod
-            def forward(ctx, x, grad_scale):
-                #print(f'_Scale_up forward input:{x}, {grad_scale}')
-                ctx.grad_scale = grad_scale
-                #print(f'_Scale_up forward output:{x * grad_scale}')
-                return x * grad_scale
-
-            @staticmethod
-            def backward(ctx, grad):
-                #print(f'_Scale_up backward input:{grad}')
-                grad_scale = ctx.grad_scale
-                #print(f'_Scale_up backward output:{grad * grad_scale}')
-                return grad * grad_scale, None
-
-        class _TPR(torch.autograd.Function):
-            @staticmethod
-            def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
-                #print(f'_TPR forward input:{x}, {w}')
-                ctx.save_for_backward(x, w, bias)
-                ctx.stride = stride
-                ctx.padding = padding
-                ctx.dilation = dilation
-                ctx.groups = groups
-                out = F.conv2d(x, w, bias, stride, padding, dilation, groups)
-                #print(f'_TPR forward output:{out}')
-                return out
-
-
-            @staticmethod
-            def backward(ctx, grad_output):
-                #print(f'_TPR backward input:{grad_output}')
-                pdb.set_trace()
-                input, weight, bias = ctx.saved_tensors
-                stride = ctx.stride
-                padding = ctx.padding
-                dilation = ctx.dilation
-                groups = ctx.groups
-                grad_input = grad_weight = grad_bias = None
-
-                even,odd=tensortpr2(grad_output)
-                grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even, stride, padding, dilation, groups)
-                grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
-                if bias is not None and ctx.needs_input_grad[2]:
-                    grad_bias = odd.sum((0,2,3)).squeeze(0)
-                #print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
-                return grad_input, grad_weight, grad_bias, None, None, None, None
-
-
-
         input = _Scale_down.apply(input, self.grad_scale)
         input = _TPR.apply(input, self.weight, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
