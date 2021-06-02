@@ -40,7 +40,7 @@ from distiller.models import create_model
 from distiller.utils import float_range_argparse_checker as float_range
 import pdb
 
-
+### TODO: Move this to tpr_optim
 _tpr_optims = {}
 def _gen_tpr_optim(optim, name):
     class TPROptim(optim):
@@ -57,10 +57,10 @@ def _gen_tpr_optim(optim, name):
             super().__init__(*args, **kwargs)
 
         def step(self, *args, **kwargs):
+            pdb.set_trace()
             for group in self.param_groups:
                 for p in group['params']:
                     print(p)
-            pdb.set_trace()
             # Apply step
             loss = super().step(*args, **kwargs)
 
