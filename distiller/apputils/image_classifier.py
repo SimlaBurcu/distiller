@@ -445,12 +445,12 @@ def _init_learner(args):
             msglogger.info('\nreset_optimizer flag set: Overriding resumed optimizer and resetting epoch count to 0')
 
     if optimizer is None and not args.evaluate:
-        '''
+        
         TPRSGD = get_tpr_optim(torch.optim.SGD, "SGD")
         optimizer = TPRSGD(model.parameters(), lr=args.lr,
                                     momentum=args.momentum, weight_decay=args.weight_decay)
-        '''
-        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr,
+
+        #optimizer = torch.optim.SGD(model.parameters(), lr=args.lr,
                             momentum=args.momentum, weight_decay=args.weight_decay)
         msglogger.debug('Optimizer Type: %s', type(optimizer))
         msglogger.debug('Optimizer Args: %s', optimizer.defaults)
