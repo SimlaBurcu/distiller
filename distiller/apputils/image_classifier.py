@@ -38,8 +38,48 @@ import distiller.quantization as quantization
 import distiller.models as models
 from distiller.models import create_model
 from distiller.utils import float_range_argparse_checker as float_range
-from distiller.tpr_optim import get_tpr_optim
 import pdb
+
+
+_tpr_optims = {}
+def _gen_tpr_optim(optim, name):
+    class TPROptim(optim):
+        """
+        Wrap the model's original optimizer in tpr
+
+        Perform the original optimizer's  update function in fp32
+        Convert the weights to two tpr formats: One with wide and another with narrow mantissas.
+            Wide weights are used in future weight updates
+            Narrow weights are used in forward and backward passes.
+        """
+        def __init__(self, *args, **kwargs):
+            self.tpr_args = unpack_tpr_args(kwargs)
+            super().__init__(*args, **kwargs)
+
+        def step(self, *args, **kwargs):
+            for group in self.param_groups:
+                for p in group['params']:
+                    print(p)
+            pdb.set_trace()
+            # Apply step
+            loss = super().step(*args, **kwargs)
+
+            return loss
+
+    TPROptim.__name__ = "TPR" + name
+    return TPROptim
+
+
+def get_tpr_optim(optim, name):
+    if name not in _tpr_optims:
+        _tpr_optims[name] = _gen_tpr_optim(optim, name)
+
+    return _tpr_optims[name]
+
+
+
+
+
 
 # Logger handle
 msglogger = logging.getLogger()
