@@ -696,7 +696,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
                 if torch.max(layer.weight.grad)<=32:
                     g_scale = 1
                 layer.grad_scale = layer.grad_scale * (2**g_scale)
-                print(f'{layer} scaled: {layer.grad_scale}')
+                print(f'{layer} scaled: {math.log(layer.grad_scale,2)}')
         optimizer.step()
         if compression_scheduler:
             compression_scheduler.on_minibatch_end(epoch, train_step, steps_per_epoch, optimizer)
