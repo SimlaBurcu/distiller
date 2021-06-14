@@ -177,43 +177,45 @@ class _Scale_down(torch.autograd.Function):
 class _Scale_up(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, grad_scale, g_scale):
-        #print(f'_Scale_up forward input:{x}, {grad_scale}')
+        print(f'_Scale_up forward input:{x}, {grad_scale}')
         ctx.grad_scale = grad_scale
         ctx.g_scale = g_scale
-        #print(f'_Scale_up forward output:{x * grad_scale}')
+        print(f'_Scale_up forward output:{x * grad_scale}')
         return x * grad_scale
 
     @staticmethod
     def backward(ctx, grad):
-        #print(f'_Scale_up backward input:{grad}')
+        print(f'_Scale_up backward input:{grad}')
         grad_scale = ctx.grad_scale
         g_scale = ctx.g_scale
         toret = grad * grad_scale
+        '''
         g_scale = 0
         if torch.max(grad)>64:
             g_scale = -1
         if torch.max(grad)<=32:
             g_scale = 1
-        #print(f'_Scale_up backward output:{grad * grad_scale}')
+        '''
+        print(f'_Scale_up backward output:{grad * grad_scale}')
         return toret, None, None
 
 class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
-        #print(f'_TPR forward input:{x}, {w}')
+        print(f'_TPR forward input:{x}, {w}')
         ctx.save_for_backward(x, w, bias)
         ctx.stride = stride
         ctx.padding = padding
         ctx.dilation = dilation
         ctx.groups = groups
         out = F.conv2d(x, w, bias, stride, padding, dilation, groups)
-        #print(f'_TPR forward output:{out}')
+        print(f'_TPR forward output:{out}')
         return out
 
 
     @staticmethod
     def backward(ctx, grad_output):
-        #print(f'_TPR backward input:{grad_output}')
+        print(f'_TPR backward input:{grad_output}')
         #pdb.set_trace()
         input, weight, bias = ctx.saved_tensors
         stride = ctx.stride
@@ -227,7 +229,7 @@ class _TPR(torch.autograd.Function):
         grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = odd.sum((0,2,3)).squeeze(0)
-        #print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
+        print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
         return grad_input, grad_weight, grad_bias, None, None, None, None
 
 
@@ -272,7 +274,7 @@ def test():
 
     optimizer.zero_grad()
 
-    #pdb.set_trace()
+    pdb.set_trace()
     o = y_pred(x)
     loss = o.sum()
     loss.backward()
