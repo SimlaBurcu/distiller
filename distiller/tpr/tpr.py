@@ -162,16 +162,16 @@ def unpack_tpr_args(kwargs):
 class _Scale_down(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, grad_scale):
-        #print(f'_Scale_down forward input:{x}, {grad_scale}')
+        print(f'_Scale_down forward input:{x}, {grad_scale}')
         ctx.grad_scale = grad_scale
-        #print(f'_Scale_down forward output:{x / grad_scale}')
+        print(f'_Scale_down forward output:{x / grad_scale}')
         return x / grad_scale
 
     @staticmethod
     def backward(ctx, grad):
-        #print(f'_Scale_down backward input:{grad}')
+        print(f'_Scale_down backward input:{grad}')
         grad_scale = ctx.grad_scale
-        #print(f'_Scale_down backward output:{grad / grad_scale}')
+        print(f'_Scale_down backward output:{grad / grad_scale}')
         return grad / grad_scale, None
 
 class _Scale_up(torch.autograd.Function):
@@ -240,7 +240,7 @@ class TPRConv2d(torch.nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, dilation=1, groups=1, bias=True, **kwargs):
 
-        grad_scale = kwargs.pop("grad_scale", 1.0)
+        grad_scale = kwargs.pop("grad_scale", 10.0)
         g_scale = kwargs.pop("g_scale", 0.0)
         super().__init__(in_channels, out_channels, kernel_size, stride,
                          padding, dilation, groups, bias, **kwargs)
