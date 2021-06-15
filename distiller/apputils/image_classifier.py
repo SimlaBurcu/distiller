@@ -164,6 +164,7 @@ class ClassifierCompressor(object):
         return top1, top5, loss
 
     def train_validate_with_scheduling(self, epoch, validate=True, verbose=True):
+        pdb.set_trace()
         if self.compression_scheduler:
             self.compression_scheduler.on_epoch_begin(epoch)
 

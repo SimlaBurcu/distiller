@@ -331,7 +331,7 @@ class LinearQuantizeSTE(torch.autograd.Function):
         # Straight-through estimator
         return grad_output, None, None, None, None
 
-
+'''
 class LinearQuantizeSTE(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, scale, zero_point, dequantize, inplace):
@@ -348,3 +348,4 @@ class LinearQuantizeSTE(torch.autograd.Function):
     def backward(ctx, grad_output):
         # Straight-through estimator
         return grad_output, None, None, None, None
+'''
