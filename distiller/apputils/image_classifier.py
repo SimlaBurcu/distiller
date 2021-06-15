@@ -164,7 +164,7 @@ class ClassifierCompressor(object):
         return top1, top5, loss
 
     def train_validate_with_scheduling(self, epoch, validate=True, verbose=True):
-        pdb.set_trace()
+        #pdb.set_trace()
         if self.compression_scheduler:
             self.compression_scheduler.on_epoch_begin(epoch)
 
@@ -607,7 +607,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
     model.train()
     acc_stats = []
     end = time.time()
-    #pdb.set_trace()
+    pdb.set_trace()
     for train_step, (inputs, target) in enumerate(train_loader):
         # Measure data loading time
         data_time.add(time.time() - end)
