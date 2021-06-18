@@ -219,7 +219,7 @@ class _TPR(torch.autograd.Function):
         grad_input = 1000+weight
         grad_weight = 2000+input
         if bias is not None and ctx.needs_input_grad[2]:
-            grad_bias = 66
+            grad_bias = torch.tensor(66.5, requires_grad=True)
         print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
         return grad_input, grad_weight, grad_bias
 
