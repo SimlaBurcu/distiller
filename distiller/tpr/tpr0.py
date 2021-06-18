@@ -286,7 +286,7 @@ def test():
     TPRSGD = get_tpr_optim(SGD, 'SGD')
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
 
-    for name, param in model.named_parameters():
+    for name, param in y_pred.named_parameters():
         print(name)
         print(param)
 
