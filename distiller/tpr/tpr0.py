@@ -242,18 +242,15 @@ class TPRConv2d(torch.nn.Module):
     def forward(self, input):
         #pdb.set_trace()
 
-        print(f'_TPR module forward input:{input}')
+        print(f'_TPR module forward input:{input} biasgrad: {self.bias.grad}')
         input = _Scale_down.apply(input, self.grad_scale)
-        print(f'_TPR module forward scaled down:{input} weight: {self.weight}')
+        print(f'_TPR module forward scaled down:{input} weight: {self.weight} biasgrad: {self.bias.grad}')
         input = _TPR.apply(input, self.weight, self.bias)
-        print(f'_TPR module forward tpred:{input} weight: {self.weight}')
+        print(f'_TPR module forward tpred:{input} weight: {self.weight} biasgrad: {self.bias.grad}')
         input = _Scale_up.apply(input, self.grad_scale, self.g_scale)
-        print(f'_TPR module forward scaled up:{input} weight: {self.weight}')
+        print(f'_TPR module forward scaled up:{input} weight: {self.weight} biasgrad: {self.bias.grad}')
 
-        if self.bias is not None:
-            return input + self.bias
-        else:
-            return input
+        return input
 
 from torch.autograd.gradcheck import gradcheck
 def simpletest():
