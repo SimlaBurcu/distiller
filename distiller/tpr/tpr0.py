@@ -241,8 +241,7 @@ class TPRConv2d(torch.nn.Module):
 
         grad_scale = kwargs.pop("grad_scale", 10.0)
         g_scale = kwargs.pop("g_scale", 0.0)
-        super().__init__(in_channels, out_channels, kernel_size, stride,
-                         padding, dilation, groups, bias, **kwargs)
+        super(TPRConv2d, self).__init__()
         self.weight = torch.tensor(22.0, requires_grad=True)
         #tpr_args = unpack_bfp_args(kwargs)
         self.grad_scale = grad_scale
