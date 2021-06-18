@@ -228,11 +228,10 @@ class TPRConv2d(torch.nn.Module):
     """
     tpr convolutional layer
     """
-    def __init__(self, in_channels, out_channels, bias=True, **kwargs):
-
+    def __init__(self, **kwargs):
+        super(TPRConv2d, self).__init__()
         grad_scale = kwargs.pop("grad_scale", 10.0)
         g_scale = kwargs.pop("g_scale", 0.0)
-        super(TPRConv2d, self).__init__()
         self.weight = torch.tensor(22.0, requires_grad=True)
         self.bias = torch.tensor(0.5, requires_grad=True)
         #tpr_args = unpack_bfp_args(kwargs)
