@@ -232,8 +232,8 @@ class TPRConv2d(torch.nn.Module):
         super(TPRConv2d, self).__init__()
         grad_scale = kwargs.pop("grad_scale", 10.0)
         g_scale = kwargs.pop("g_scale", 0.0)
-        self.weight = nn.Parameter(torch.tensor(22.0, requires_grad=True))
-        self.bias = nn.Parameter(torch.tensor(0.5, requires_grad=True))
+        self.weight = torch.nn.Parameter(torch.tensor(22.0, requires_grad=True))
+        self.bias = torch.nn.Parameter(torch.tensor(0.5, requires_grad=True))
         #tpr_args = unpack_bfp_args(kwargs)
         self.grad_scale = grad_scale
         self.g_scale = g_scale
