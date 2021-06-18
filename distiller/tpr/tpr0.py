@@ -37,7 +37,7 @@ import logging
 import unittest
 import math
 import time
-from tpr.tpr_optim import *
+from distiller.distiller.tpr.tpr_optim import *
 
 def tensortpr2(tensor):
     """
