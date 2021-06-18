@@ -237,7 +237,7 @@ class TPRConv2d(torch.nn.Module):
         self.bias = torch.nn.Parameter(torch.tensor(0.5, requires_grad=True))
         #tpr_args = unpack_bfp_args(kwargs)
         self.grad_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False))
-        self.g_scale = g_scale
+        self.g_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False))
 
     def forward(self, input):
         #pdb.set_trace()
@@ -286,9 +286,9 @@ def test():
     TPRSGD = get_tpr_optim(SGD, 'SGD')
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
 
-    for name, param in y_pred.named_parameters():
-        print(name)
-        print(param)
+    for group in optimizer.param_groups:
+        group['grad_scale']=y_pred.grad_scale
+        group['g_scale']=y_pred.g_scale
 
     x = torch.tensor(33.0, requires_grad=True)
     optimizer.zero_grad()
