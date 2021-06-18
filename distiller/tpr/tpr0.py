@@ -259,10 +259,7 @@ class TPRConv2d(torch.nn.Module):
         input = _Scale_up.apply(input, self.grad_scale, self.g_scale)
         print(f'_TPR module forward scaled up:{input} weight: {self.weight}')
 
-        if self.bias is not None:
-            return input + self.bias
-        else:
-            return input
+        return input
 
 from torch.autograd.gradcheck import gradcheck
 def simpletest():
