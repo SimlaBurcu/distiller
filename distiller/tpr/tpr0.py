@@ -37,6 +37,7 @@ import logging
 import unittest
 import math
 import time
+from distiller.tpr_optim import get_tpr_optim
 
 def tensortpr2(tensor):
     """
@@ -274,7 +275,8 @@ def test():
     dtype = torch.float
     device = torch.device("cuda:0")
     y_pred = TPRConv2d()
-    optimizer = SGD(y_pred.parameters(), lr=0.1)
+    TPRSGD = get_tpr_optim(SGD, 'SGD')
+    optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
 
     x = torch.tensor(33.0, requires_grad=True)
     optimizer.zero_grad()
