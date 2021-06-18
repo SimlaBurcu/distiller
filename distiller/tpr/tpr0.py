@@ -289,13 +289,17 @@ def test():
     loss = o.sum()
     print(f'loss: {loss}')
     loss.backward()
+    print('end of backward')
+    print(y_pred)
+
+    '''
     pdb.set_trace()
     moduleConv = TPRConv2d(3, 3)
 
     input = [torch.randn(20, 20, dtype=torch.double, requires_grad=True)]
     test = gradcheck(moduleConv, input, eps=1e-6, atol=1e-4)
     print("Are the gradients correct: ", test)
-
+    '''
 
 def test_float_to_fp4():
     """
