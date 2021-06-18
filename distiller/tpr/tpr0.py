@@ -221,7 +221,7 @@ class _TPR(torch.autograd.Function):
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = 66
         print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
-        return grad_input, grad_weight, grad_bias, None, None, None, None
+        return grad_input, grad_weight, grad_bias
 
 
 class TPRConv2d(torch.nn.Module):
