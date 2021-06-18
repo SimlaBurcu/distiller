@@ -273,7 +273,7 @@ def simpletest():
 def test():
     dtype = torch.float
     device = torch.device("cuda:0")
-    y_pred = TPRConv2d(4, 4, 0.5)
+    y_pred = TPRConv2d()
     optimizer = SGD(y_pred.parameters(), lr=0.1)
 
     x = torch.tensor(33.0, requires_grad=True)
