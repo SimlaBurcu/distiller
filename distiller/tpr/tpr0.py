@@ -265,8 +265,7 @@ def simpletest():
     device = torch.device("cuda:0")
     y_pred = TPRConv2d(4, 4, (3, 5), bias = None, stride=(2, 1), padding=(4, 2))
     optimizer = SGD(y_pred.parameters(), lr=0.1)
-    for pg in self._get_new_optimizer_params_groups():
-        optimizer.add_param_group(pg)
+
 
     y_pred.cuda()
 
@@ -286,6 +285,9 @@ def test():
     y_pred = TPRConv2d()
     TPRSGD = get_tpr_optim(SGD, 'SGD')
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
+
+    for pg in _get_new_optimizer_params_groups(y_pred):
+        optimizer.add_param_group(pg)
 
     x = torch.tensor(33.0, requires_grad=True)
     optimizer.zero_grad()
