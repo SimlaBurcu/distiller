@@ -254,8 +254,8 @@ class TPRConv2d(torch.nn.Module):
 
 def _get_new_optimizer_params_groups(model):
     clip_val_group = {'params': [param for name, param in model.named_parameters() if 'grad_scale' in name]}
-    if self.g_scale is not None:
-        clip_val_group['weight_decay'] = self.g_scale
+    if model.g_scale is not None:
+        clip_val_group['weight_decay'] = model.g_scale
     return [clip_val_group]
 
 
