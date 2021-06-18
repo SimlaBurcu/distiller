@@ -286,6 +286,7 @@ def test():
     print(f'loss: {loss}')
     loss.backward()
     print('end of backward')
+    pdb.set_trace()
     optimizer.step()
 
     print(loss.item())
