@@ -500,7 +500,7 @@ def test_autograd():
     print(f'main: {input}')
     input = down.apply(input, torch.tensor(3.0, requires_grad=True))
     print(f'main down: {input}')
-    input = tpr2.apply(input, torch.tensor(5.0, requires_grad=True))
+    input = tpr.apply(input, torch.tensor(5.0, requires_grad=True))
     print(f'main tpr: {input}')
     input = up.apply(input, torch.tensor(3.0, requires_grad=True))
     print(f'main up: {input}')
