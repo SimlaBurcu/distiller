@@ -286,6 +286,10 @@ def test():
     TPRSGD = get_tpr_optim(SGD, 'SGD')
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
 
+    for name, param in model.named_parameters():
+        print(name)
+        print(param)
+
     x = torch.tensor(33.0, requires_grad=True)
     optimizer.zero_grad()
 
