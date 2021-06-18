@@ -286,13 +286,12 @@ def test():
     dtype = torch.float
     device = torch.device("cuda:0")
     y_pred = TPRConv2d(4, 4, (3, 5), bias = None, stride=(2, 1), padding=(4, 2))
-    optimizer = SGD(y_pred.parameters(), lr=0.1)
+
 
     y_pred.cuda()
 
     x = torch.tensor(33.0, requires_grad=True)
 
-    optimizer.zero_grad()
 
 
     o = y_pred(x)
