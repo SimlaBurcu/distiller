@@ -150,7 +150,7 @@ def unpack_tpr_args(kwargs):
     tpr_argn = [('num_format', 'fp32'),
                 ('rounding_mode', 'stoc'),
                 ('epsilon', 1e-8),
-                ('init_grad_scale', 1.0)]
+                ('cur_grad_scale', 1.0)]
 
     for arg, default in tpr_argn:
         if arg in kwargs:
@@ -285,13 +285,6 @@ def test():
     y_pred = TPRConv2d()
     TPRSGD = get_tpr_optim(SGD, 'SGD')
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
-
-    for name, param in y_pred.named_parameters():
-        print(name)
-        print(param)
-
-    for pg in _get_new_optimizer_params_groups(y_pred):
-        optimizer.add_param_group(pg)
 
     x = torch.tensor(33.0, requires_grad=True)
     optimizer.zero_grad()
