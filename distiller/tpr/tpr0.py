@@ -554,4 +554,4 @@ if __name__ == '__main__':
     #test_function_returns_input()
     #test_autograd()
     #gradtest()
-    test_autograd()
+    test()
