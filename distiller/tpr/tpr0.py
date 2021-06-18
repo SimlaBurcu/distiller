@@ -242,13 +242,13 @@ class TPRConv2d(torch.nn.Module):
     def forward(self, input):
         #pdb.set_trace()
 
-        print(f'_TPR module forward input:{input} biasgrad: {self.bias.grad}')
+        print(f'_TPR module forward input:{input} ')
         input = _Scale_down.apply(input, self.grad_scale)
-        print(f'_TPR module forward scaled down:{input} weight: {self.weight} biasgrad: {self.bias.grad}')
+        print(f'_TPR module forward scaled down:{input} weight: {self.weight}')
         input = _TPR.apply(input, self.weight, self.bias)
-        print(f'_TPR module forward tpred:{input} weight: {self.weight} biasgrad: {self.bias.grad}')
+        print(f'_TPR module forward tpred:{input} weight: {self.weight}')
         input = _Scale_up.apply(input, self.grad_scale, self.g_scale)
-        print(f'_TPR module forward scaled up:{input} weight: {self.weight} biasgrad: {self.bias.grad}')
+        print(f'_TPR module forward scaled up:{input} weight: {self.weight}')
 
         return input
 
@@ -275,10 +275,10 @@ def test():
     dtype = torch.float
     device = torch.device("cuda:0")
     y_pred = TPRConv2d(4, 4, 0.5)
-
+    optimizer = SGD(y_pred.parameters(), lr=0.1)
 
     x = torch.tensor(33.0, requires_grad=True)
-
+    optimizer.zero_grad()
 
 
     o = y_pred(x)
@@ -287,17 +287,10 @@ def test():
     print(f'loss: {loss}')
     loss.backward()
     print('end of backward')
-    print(y_pred)
-    pdb.set_trace()
+    optimizer.step()
 
-    '''
-    pdb.set_trace()
-    moduleConv = TPRConv2d(3, 3)
+    print(loss.item())
 
-    input = [torch.randn(20, 20, dtype=torch.double, requires_grad=True)]
-    test = gradcheck(moduleConv, input, eps=1e-6, atol=1e-4)
-    print("Are the gradients correct: ", test)
-    '''
 
 def test_float_to_fp4():
     """
