@@ -273,7 +273,6 @@ def simpletest():
 
     loss = o.sum()
     loss.backward()
-    pdb.set_trace()
 
 def test():
     dtype = torch.float
@@ -292,6 +291,7 @@ def test():
     loss.backward()
     print('end of backward')
     print(y_pred)
+    pdb.set_trace()
 
     '''
     pdb.set_trace()
