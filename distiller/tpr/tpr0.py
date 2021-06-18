@@ -273,6 +273,7 @@ def simpletest():
 
     loss = o.sum()
     loss.backward()
+    pdb.set_trace()
 
 def test():
     dtype = torch.float
