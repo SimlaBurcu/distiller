@@ -422,31 +422,31 @@ def test_autograd():
     class down(torch.autograd.Function):
         @staticmethod
         def forward(ctx, x, grad_scale):
-            #print(f'down forward input:{x}')
+            print(f'down forward input:{x}')
             ctx.grad_scale = grad_scale
-            #print(f'down forward output:{x / grad_scale}')
+            print(f'down forward output:{x / grad_scale}')
             return x / grad_scale
 
         @staticmethod
         def backward(ctx, grad):
-            #print(f'down backward input:{grad}')
+            print(f'down backward input:{grad}')
             grad_scale = ctx.grad_scale
-            #print(f'down backward output:{grad / grad_scale}')
+            print(f'down backward output:{grad / grad_scale}')
             return grad / grad_scale, None
 
     class up(torch.autograd.Function):
         @staticmethod
         def forward(ctx, x, grad_scale):
-            #print(f'up forward input:{x}')
+            print(f'up forward input:{x}')
             ctx.grad_scale = grad_scale
-            #print(f'up forward output:{x * grad_scale}')
+            print(f'up forward output:{x * grad_scale}')
             return x * grad_scale
 
         @staticmethod
         def backward(ctx, grad):
-            #print(f'up backward input:{grad}')
+            print(f'up backward input:{grad}')
             grad_scale = ctx.grad_scale
-            #print(f'up backward output:{grad * grad_scale}')
+            print(f'up backward output:{grad * grad_scale}')
             return grad * grad_scale, None
 
     class tpr(torch.autograd.Function):
@@ -457,13 +457,13 @@ def test_autograd():
 
         @staticmethod
         def backward(ctx, grad_output):
-            #print(f'tpr backward input:{grad_output}')
+            print(f'tpr backward input:{grad_output}')
             input, weight = ctx.saved_tensors
             grad_input = grad_weight = None
 
             grad_input = 100*weight
             grad_weight = 10*input
-            #print(f'tpr backward output:{grad_input}, {grad_weight}')
+            print(f'tpr backward output:{grad_input}, {grad_weight}')
             return grad_input, grad_weight
 
 
@@ -476,7 +476,7 @@ def test_autograd():
         @staticmethod
         def backward(ctx, grad_output):
             #pdb.set_trace()
-            #print(f'tpr2 backward input:{grad_output}')
+            print(f'tpr2 backward input:{grad_output}')
             input, weight = ctx.saved_tensors
             grad_output.requires_grad = True
             with torch.enable_grad():
@@ -493,17 +493,17 @@ def test_autograd():
 
                 grad_input = 100*grad_input
                 grad_weight = 10*grad_weight
-                #print(f'tpr2 backward output:{grad_input}, {grad_weight}')
+                print(f'tpr2 backward output:{grad_input}, {grad_weight}')
                 return grad_input, grad_weight
 
     input = torch.tensor(6.0, requires_grad=True)
-    #print(f'main: {input}')
+    print(f'main: {input}')
     input = down.apply(input, torch.tensor(3.0, requires_grad=True))
-    #print(f'main down: {input}')
+    print(f'main down: {input}')
     input = tpr2.apply(input, torch.tensor(5.0, requires_grad=True))
-    #print(f'main tpr: {input}')
+    print(f'main tpr: {input}')
     input = up.apply(input, torch.tensor(3.0, requires_grad=True))
-    #print(f'main up: {input}')
+    print(f'main up: {input}')
     input.backward()
 
 def gradtest():
@@ -531,4 +531,4 @@ if __name__ == '__main__':
     #test_function_returns_input()
     #test_autograd()
     #gradtest()
-    test()
+    test_autograd()
