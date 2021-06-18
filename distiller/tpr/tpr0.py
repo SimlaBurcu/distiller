@@ -286,6 +286,10 @@ def test():
     TPRSGD = get_tpr_optim(SGD, 'SGD')
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
 
+    for name, param in y_pred.named_parameters()
+        print(name)
+        print(param)
+
     for pg in _get_new_optimizer_params_groups(y_pred):
         optimizer.add_param_group(pg)
 
