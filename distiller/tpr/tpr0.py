@@ -189,11 +189,11 @@ class _Scale_up(torch.autograd.Function):
         grad_scale = ctx.grad_scale
         toret = grad * grad_scale
 
-        g_scale = 0
-        if torch.max(grad)>64:
-            g_scale = -1
-        if torch.max(grad)<=32:
-            g_scale = 1
+        toret = 70
+        if torch.max(toret)>64:
+            g_scale = -71
+        if torch.max(toret)<=32:
+            g_scale = 71
 
         print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
         return toret, g_scale
