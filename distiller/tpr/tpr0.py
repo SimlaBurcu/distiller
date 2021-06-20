@@ -172,9 +172,8 @@ class _Scale_down(torch.autograd.Function):
     def backward(ctx, grad):
         print(f'_Scale_down backward input:{grad}')
         grad_scale = ctx.grad_scale
-        g_scale = torch.tensor(200.0, requires_grad=False)
         print(f'_Scale_down backward output:{grad / grad_scale}')
-        return grad / grad_scale, g_scale
+        return grad / grad_scale, None
 
 class _Scale_up(torch.autograd.Function):
     @staticmethod
@@ -301,6 +300,17 @@ def test():
     print(f'loss: {loss}')
     loss.backward()
     print('end of backward')
+
+    for param_tensor in y_pred.state_dict():
+        print(param_tensor, "\t", y_pred.state_dict()[param_tensor].size())
+
+    print()
+
+    # Print optimizer's state_dict
+    print("Optimizer's state_dict:")
+    for var_name in optimizer.state_dict():
+        print(var_name, "\t", optimizer.state_dict()[var_name])
+
     pdb.set_trace()
 
     optimizer.step()
