@@ -196,7 +196,7 @@ class _Scale_up(torch.autograd.Function):
             g_scale = 1
         '''
         print(f'_Scale_up backward output:{grad * grad_scale}')
-        return toret, None, None
+        return toret, None
 
 class _TPR(torch.autograd.Function):
     @staticmethod
@@ -221,7 +221,7 @@ class _TPR(torch.autograd.Function):
             grad_bias = torch.tensor(66.5, requires_grad=True)
         if(grad_input>64):
             g_scale = -1
-        print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
+        print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias},{g_scale}')
         return grad_input, grad_weight, grad_bias, g_scale
 
 
