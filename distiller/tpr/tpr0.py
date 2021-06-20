@@ -188,15 +188,15 @@ class _Scale_up(torch.autograd.Function):
         print(f'_Scale_up backward input:{grad}')
         grad_scale = ctx.grad_scale
         toret = grad * grad_scale
-        '''
+
         g_scale = 0
         if torch.max(grad)>64:
             g_scale = -1
         if torch.max(grad)<=32:
             g_scale = 1
-        '''
-        print(f'_Scale_up backward output:{grad * grad_scale}')
-        return toret, None, None
+
+        print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
+        return toret, g_scale
 
 class _TPR(torch.autograd.Function):
     @staticmethod
