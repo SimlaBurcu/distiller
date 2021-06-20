@@ -189,7 +189,6 @@ class _Scale_up(torch.autograd.Function):
         grad_scale = ctx.grad_scale
         toret = grad * grad_scale
 
-        toret = 70
         if torch.max(toret)>64:
             g_scale = -71
         if torch.max(toret)<=32:
