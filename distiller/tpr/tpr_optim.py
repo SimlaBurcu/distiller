@@ -55,7 +55,11 @@ def _gen_tpr_optim(optim, name):
                             continue
                         d_p = p.grad.data
                         print(f'gradscales grad {d_p}')
-                    print(f'grad group came: {group}')
+                        if(d_p > 0):
+                            p.data.mul_(2.0)
+                        if(d_p < 0):
+                            p.data.mul_(0.5)
+                    print(f'grad group came: {group} data{p.data}')
 
             pdb.set_trace()
             # Apply step

@@ -315,6 +315,8 @@ def test():
 
     optimizer.step()
 
+    pdb.set_trace()
+
     print(loss.item())
 
 
