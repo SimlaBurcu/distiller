@@ -200,7 +200,7 @@ class _Scale_up(torch.autograd.Function):
 
 class _TPR(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, x, w, bias=None, grad_scale):
+    def forward(ctx, x, w, bias, grad_scale):
         print(f'_TPR forward input:{x}, {w}')
         ctx.save_for_backward(x, w, bias)
         out = x+w
