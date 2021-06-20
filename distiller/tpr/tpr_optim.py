@@ -49,7 +49,7 @@ def _gen_tpr_optim(optim, name):
         def step(self, *args, **kwargs):
             for group in self.param_groups:
                 print(group)
-                if(group['lr']==1.0):
+                if(group['lr']==0.0):
                     for p in group['params']:
                         if p.grad is None:
                             continue
@@ -59,7 +59,7 @@ def _gen_tpr_optim(optim, name):
                             p.data.mul_(2.0)
                         if(d_p < 0):
                             p.data.mul_(0.5)
-                    print(f'grad group came: {group} data{p.data}')
+                    print(f'grad group came: {group} data {p.data}')
 
             pdb.set_trace()
             # Apply step

@@ -292,7 +292,7 @@ def test():
             model_parameters.append(parameter)
     #pdb.set_trace()
 
-    optimizer = TPRSGD([{'params': gradscale, 'lr': 1.},{'params': model_parameters}], lr=0.1)
+    optimizer = TPRSGD([{'params': gradscale, 'lr': 0.},{'params': model_parameters}], lr=0.1)
 
     '''
     for group in optimizer.param_groups:
@@ -314,7 +314,7 @@ def test():
     pdb.set_trace()
 
     optimizer.step()
-
+    print(f'grad_scale value: {y_pred.grad_scale}')
     pdb.set_trace()
 
     print(loss.item())
