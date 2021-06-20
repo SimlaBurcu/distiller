@@ -172,8 +172,9 @@ class _Scale_down(torch.autograd.Function):
     def backward(ctx, grad):
         print(f'_Scale_down backward input:{grad}')
         grad_scale = ctx.grad_scale
+        g_scale = torch.tensor(2.0, requires_grad=False)
         print(f'_Scale_down backward output:{grad / grad_scale}')
-        return grad / grad_scale, None
+        return grad / grad_scale, g_scale
 
 class _Scale_up(torch.autograd.Function):
     @staticmethod
