@@ -196,7 +196,7 @@ class _Scale_up(torch.autograd.Function):
             g_scale = 71
 
         print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
-        return toret, g_scale
+        return toret, g_scale, None
 
 class _TPR(torch.autograd.Function):
     @staticmethod
