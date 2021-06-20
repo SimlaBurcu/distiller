@@ -290,10 +290,9 @@ def test():
             gradscale.append(parameter)
         else:
             model_parameters.append(parameter)
-    pdb.set_trace()
-    optimizer = optim.SGD([{'params': model_parameters, 'lr': 0.5},{'params': gradscale}], lr=1.)
+    #pdb.set_trace()
 
-    optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
+    optimizer = TPRSGD([{'params': gradscale, 'lr': 1.},{'params': model_parameters}], lr=0.1)
 
     '''
     for group in optimizer.param_groups:
