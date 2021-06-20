@@ -286,7 +286,7 @@ def test():
 
     for group in optimizer.param_groups:
         group['grad_scale']=y_pred.grad_scale
-        group['g_scale']=y_pred.g_scale
+        #group['g_scale']=y_pred.g_scale
 
     x = torch.tensor(33.0, requires_grad=True)
     optimizer.zero_grad()
