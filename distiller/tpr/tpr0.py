@@ -180,7 +180,6 @@ class _Scale_up(torch.autograd.Function):
     def forward(ctx, x, grad_scale, g_scale):
         print(f'_Scale_up forward input:{x}, {grad_scale}')
         ctx.grad_scale = grad_scale
-        ctx.g_scale = g_scale
         print(f'_Scale_up forward output:{x * grad_scale}')
         return x * grad_scale
 
@@ -188,7 +187,6 @@ class _Scale_up(torch.autograd.Function):
     def backward(ctx, grad):
         print(f'_Scale_up backward input:{grad}')
         grad_scale = ctx.grad_scale
-        g_scale = ctx.g_scale
         toret = grad * grad_scale
         '''
         g_scale = 0
@@ -232,12 +230,12 @@ class TPRConv2d(torch.nn.Module):
     def __init__(self, **kwargs):
         super(TPRConv2d, self).__init__()
         #grad_scale = kwargs.pop("grad_scale", 10.0)
-        g_scale = kwargs.pop("g_scale", 0.0)
+        #g_scale = kwargs.pop("g_scale", 0.0)
         self.weight = torch.nn.Parameter(torch.tensor(22.0, requires_grad=True))
         self.bias = torch.nn.Parameter(torch.tensor(0.5, requires_grad=True))
         #tpr_args = unpack_bfp_args(kwargs)
-        self.grad_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False))
-        self.g_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False))
+        self.grad_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=True))
+        #self.g_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False))
 
     def forward(self, input):
         #pdb.set_trace()
@@ -247,7 +245,7 @@ class TPRConv2d(torch.nn.Module):
         print(f'_TPR module forward scaled down:{input} weight: {self.weight}')
         input = _TPR.apply(input, self.weight, self.bias)
         print(f'_TPR module forward tpred:{input} weight: {self.weight}')
-        input = _Scale_up.apply(input, self.grad_scale, self.g_scale)
+        input = _Scale_up.apply(input, self.grad_scale)
         print(f'_TPR module forward scaled up:{input} weight: {self.weight}')
 
         return input
