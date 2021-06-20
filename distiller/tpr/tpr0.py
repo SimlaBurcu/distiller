@@ -288,13 +288,10 @@ def test():
     for name, parameter in model.named_parameters():
         if 'grad_scale' in name:
             gradscale.append(parameter)
-         else:
+        else:
             model_parameters.append(parameter)
     pdb.set_trace()
-    optimizer = optim.SGD([
-        {'params': slow_parameters, 'lr': 0.5},
-        {'params': fast_parameters}
-    ], lr=1.)
+    optimizer = optim.SGD([{'params': slow_parameters, 'lr': 0.5},{'params': fast_parameters}], lr=1.)
 
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
 
