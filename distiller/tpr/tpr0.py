@@ -282,6 +282,20 @@ def test():
     device = torch.device("cuda:0")
     y_pred = TPRConv2d()
     TPRSGD = get_tpr_optim(SGD, 'SGD')
+
+    model_parameters = []
+    gradscale = []
+    for name, parameter in model.named_parameters():
+        if 'grad_scale' in name:
+            gradscale.append(parameter)
+         else:
+            model_parameters.append(parameter)
+    pdb.set_trace()
+    optimizer = optim.SGD([
+        {'params': slow_parameters, 'lr': 0.5},
+        {'params': fast_parameters}
+    ], lr=1.)
+
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
 
     '''
