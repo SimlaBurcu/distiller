@@ -200,7 +200,7 @@ class _Scale_up(torch.autograd.Function):
 
 class _TPR(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, x, w, bias=None):
+    def forward(ctx, x, w, bias=None, grad_scale):
         print(f'_TPR forward input:{x}, {w}')
         ctx.save_for_backward(x, w, bias)
         out = x+w
@@ -213,14 +213,16 @@ class _TPR(torch.autograd.Function):
         print(f'_TPR backward input:{grad_output}')
         #pdb.set_trace()
         input, weight, bias = ctx.saved_tensors
-        grad_input = grad_weight = grad_bias = None
+        grad_input = grad_weight = grad_bias = g_scale = None
 
         grad_input = 1000+weight
         grad_weight = 2000+input
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = torch.tensor(66.5, requires_grad=True)
+        if(grad_input>64):
+            g_scale = -1
         print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
-        return grad_input, grad_weight, grad_bias
+        return grad_input, grad_weight, grad_bias, g_scale
 
 
 class TPRConv2d(torch.nn.Module):
@@ -234,8 +236,8 @@ class TPRConv2d(torch.nn.Module):
         self.weight = torch.nn.Parameter(torch.tensor(22.0, requires_grad=True))
         self.bias = torch.nn.Parameter(torch.tensor(0.5, requires_grad=True))
         #tpr_args = unpack_bfp_args(kwargs)
-        self.grad_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=True))
-        #self.g_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False))
+        self.grad_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False))
+        #self.g_scale = torch.nn.Parameter(torch.tensor(1.0, requires_grad=False))
 
     def forward(self, input):
         #pdb.set_trace()
@@ -243,7 +245,7 @@ class TPRConv2d(torch.nn.Module):
         print(f'_TPR module forward input:{input} ')
         input = _Scale_down.apply(input, self.grad_scale)
         print(f'_TPR module forward scaled down:{input} weight: {self.weight}')
-        input = _TPR.apply(input, self.weight, self.bias)
+        input = _TPR.apply(input, self.weight, self.bias, self.grad_scale)
         print(f'_TPR module forward tpred:{input} weight: {self.weight}')
         input = _Scale_up.apply(input, self.grad_scale)
         print(f'_TPR module forward scaled up:{input} weight: {self.weight}')
@@ -284,9 +286,11 @@ def test():
     TPRSGD = get_tpr_optim(SGD, 'SGD')
     optimizer = TPRSGD(y_pred.parameters(), lr=0.1)
 
+    '''
     for group in optimizer.param_groups:
         group['grad_scale']=y_pred.grad_scale
-        #group['g_scale']=y_pred.g_scale
+        group['g_scale']=y_pred.g_scale
+    '''
 
     x = torch.tensor(33.0, requires_grad=True)
     optimizer.zero_grad()
@@ -299,6 +303,7 @@ def test():
     loss.backward()
     print('end of backward')
     pdb.set_trace()
+
     optimizer.step()
 
     print(loss.item())
