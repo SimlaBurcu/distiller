@@ -177,7 +177,7 @@ class _Scale_down(torch.autograd.Function):
 
 class _Scale_up(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, x, grad_scale, g_scale):
+    def forward(ctx, x, grad_scale):
         print(f'_Scale_up forward input:{x}, {grad_scale}')
         ctx.grad_scale = grad_scale
         print(f'_Scale_up forward output:{x * grad_scale}')
