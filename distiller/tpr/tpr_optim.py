@@ -61,7 +61,7 @@ def _gen_tpr_optim(optim, name):
                             p.data.mul_(0.5)
                     print(f'grad group came: {group} data {p.data}')
 
-            pdb.set_trace()
+            #pdb.set_trace()
             # Apply step
             loss = super().step(*args, **kwargs)
 

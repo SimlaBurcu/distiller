@@ -38,7 +38,7 @@ import unittest
 import math
 import time
 
-def tensortpr2(tensor):
+def tensortpr(tensor):
     """
     Convert float tensor t to fp4
     """
@@ -83,7 +83,7 @@ def _get_op_name(name, **kwargs):
     Returns the operation's name that is performed in tpr format
     """
     return  'FP4_%s' % (name)
-
+'''
 def _gen_tpr_op(op, name, **kwargs):
     name = _get_op_name(name, **kwargs)
     tpr_args = unpack_bfp_args(kwargs)
@@ -111,7 +111,7 @@ def _gen_tpr_op(op, name, **kwargs):
             input, weight = ctx.saved_tensors
             grad_input = grad_weight = grad_bias = None
 
-            even,odd=tensortpr2(grad_output, device)
+            even,odd=tensortpr(grad_output, device)
             if ctx.needs_input_grad[0]:
                 grad_input = even.mm(weight)
             if ctx.needs_input_grad[1]:
@@ -139,7 +139,7 @@ def _get_tpr_op(op, name, tpr_args):
         _tpr_ops[name] = _gen_tpr_op(op, name, tpr_args)
 
     return _tpr_ops[name]
-
+'''
 
 def unpack_tpr_args(kwargs):
     """
@@ -176,10 +176,9 @@ class _Scale_down(torch.autograd.Function):
 
 class _Scale_up(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, x, grad_scale, g_scale):
+    def forward(ctx, x, grad_scale):
         print(f'_Scale_up forward input:{x}, {grad_scale}')
         ctx.grad_scale = grad_scale
-        ctx.g_scale = g_scale
         print(f'_Scale_up forward output:{x * grad_scale}')
         return x * grad_scale
 
@@ -187,18 +186,17 @@ class _Scale_up(torch.autograd.Function):
     def backward(ctx, grad):
         print(f'_Scale_up backward input:{grad}')
         grad_scale = ctx.grad_scale
-        g_scale = ctx.g_scale
         toret = grad * grad_scale
-        '''
-        g_scale = 0
-        if torch.max(grad)>64:
-            g_scale = -1
-        if torch.max(grad)<=32:
-            g_scale = 1
-        '''
-        print(f'_Scale_up backward output:{grad * grad_scale}')
-        return toret, None, None
 
+        g_scale = torch.tensor(0.0, requires_grad=False)
+        if torch.max(toret)>64:
+            g_scale = torch.tensor(-1.0, requires_grad=False)
+        if torch.max(toret)<=32:
+            g_scale = torch.tensor(1.0, requires_grad=False)
+
+        print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
+        return toret, g_scale
+'''
 class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
@@ -224,13 +222,38 @@ class _TPR(torch.autograd.Function):
         groups = ctx.groups
         grad_input = grad_weight = grad_bias = None
 
-        even,odd=tensortpr2(grad_output)
+        even,odd=tensortpr(grad_output)
         grad_input = torch.nn.grad.conv2d_input(input.shape, weight, even, stride, padding, dilation, groups)
         grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = odd.sum((0,2,3)).squeeze(0)
         print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
         return grad_input, grad_weight, grad_bias, None, None, None, None
+'''
+
+class _TPR(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x, w, bias=None):
+        print(f'_TPR forward input:{x}, {w}')
+        ctx.save_for_backward(x, w, bias)
+        out = x+w
+        print(f'_TPR forward output:{out}')
+        return out
+
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        print(f'_TPR backward input:{grad_output}')
+        #pdb.set_trace()
+        input, weight, bias = ctx.saved_tensors
+        grad_input = grad_weight = grad_bias = None
+
+        grad_input = 1000+weight
+        grad_weight = 2000+input
+        if bias is not None and ctx.needs_input_grad[2]:
+            grad_bias = torch.tensor(66.5, requires_grad=True)
+        print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
+        return grad_input, grad_weight, grad_bias
 
 
 class TPRConv2d(torch.nn.Conv2d):
@@ -239,26 +262,21 @@ class TPRConv2d(torch.nn.Conv2d):
     """
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, dilation=1, groups=1, bias=True, **kwargs):
-
-        grad_scale = kwargs.pop("grad_scale", 10.0)
-        g_scale = kwargs.pop("g_scale", 0.0)
         super().__init__(in_channels, out_channels, kernel_size, stride,
                          padding, dilation, groups, bias, **kwargs)
-        #tpr_args = unpack_bfp_args(kwargs)
         self.grad_scale = grad_scale
-        self.g_scale = g_scale
 
     def forward(self, input):
         #pdb.set_trace()
+        print(f'_TPR module forward input:{input} ')
         input = _Scale_down.apply(input, self.grad_scale)
-        input = _TPR.apply(input, self.weight, self.bias, self.stride,
-                        self.padding, self.dilation, self.groups)
-        input = _Scale_up.apply(input, self.grad_scale, self.g_scale)
+        print(f'_TPR module forward scaled down:{input} weight: {self.weight}')
+        input = _TPR.apply(input, self.weight, self.bias)
+        print(f'_TPR module forward tpred:{input} weight: {self.weight}')
+        input = _Scale_up.apply(input, self.grad_scale)
+        print(f'_TPR module forward scaled up:{input} weight: {self.weight}')
 
-        if self.bias is not None:
-            return input + self.bias
-        else:
-            return input
+        return input
 
 from torch.autograd.gradcheck import gradcheck
 def test():
@@ -337,7 +355,7 @@ def test_float_to_fp4():
     x_data = torch.tensor(numbers)
     start = time.time()
     for i in range(1000):
-        e,o=tensortpr2(x_data, epsilon, "even", device)
+        e,o=tensortpr(x_data, epsilon, "even", device)
     end = time.time()
     #print(f'first: {end - start}')
     #print(f'even: {e}, odd: {o}')
