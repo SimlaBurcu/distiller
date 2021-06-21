@@ -196,7 +196,7 @@ class _Scale_up(torch.autograd.Function):
 
         print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
         return toret, g_scale
-'''
+
 class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
@@ -254,7 +254,7 @@ class _TPR(torch.autograd.Function):
             grad_bias = torch.tensor(66.5, requires_grad=True)
         print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
         return grad_input, grad_weight, grad_bias
-
+'''
 
 class TPRConv2d(torch.nn.Conv2d):
     """

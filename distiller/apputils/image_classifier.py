@@ -462,7 +462,7 @@ def _init_learner(args):
     if optimizer is None and not args.evaluate:
         #TPRSGD = get_tpr_optim(torch.optim.SGD, "SGD")
         #optimizer = TPRSGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
-        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+        optimizer = TPRSGD([{'params': gradscale, 'lr': 0.},{'params': model.parameters()}], lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
         msglogger.debug('Optimizer Type: %s', type(optimizer))
         msglogger.debug('Optimizer Args: %s', optimizer.defaults)
 
@@ -686,6 +686,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
 
         #pdb.set_trace()
+        '''
         def get_children(model: torch.nn.Module):
             # get children form model!
             children = list(model.children())
@@ -706,6 +707,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
             if 'TPR' in str(layer):
                 layer.grad_scale = layer.grad_scale * (2**layer.g_scale)
                 print(f'{layer} scaled by {layer.g_scale}: {math.log(layer.grad_scale,2)}')
+        '''
         optimizer.step()
         if compression_scheduler:
             compression_scheduler.on_minibatch_end(epoch, train_step, steps_per_epoch, optimizer)

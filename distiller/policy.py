@@ -319,9 +319,11 @@ class QuantizationPolicy(ScheduledTrainingPolicy):
         super(QuantizationPolicy, self).__init__()
         self.quantizer = quantizer
         self.quantizer.prepare_model()
+        ##SCALE DOWN?
         self.quantizer.quantize_params()
 
     def on_minibatch_end(self, model, epoch, minibatch_id, minibatches_per_epoch, zeros_mask_dict, optimizer):
         # After parameters update, quantize the parameters again
         # (Doing this here ensures the model parameters are quantized at training completion (and at validation time)
+        #SCALE DOWN?
         self.quantizer.quantize_params()
