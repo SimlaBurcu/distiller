@@ -53,13 +53,27 @@ def _gen_tpr_optim(optim, name):
             Narrow weights are used in forward and backward passes.
         """
         def __init__(self, *args, **kwargs):
-            #self.tpr_args = unpack_tpr_args(kwargs)
+            self.tpr_args = unpack_tpr_args(kwargs)
             super().__init__(*args, **kwargs)
 
         def step(self, *args, **kwargs):
-            #print(self.param_groups[-1])
+            for group in self.param_groups:
+                print(group)
+                if(group['lr']==0.0):
+                    for p in group['params']:
+                        if p.grad is None:
+                            continue
+                        d_p = p.grad.data
+                        print(f'gradscales grad {d_p}')
+                        if(d_p > 0):
+                            p.data.mul_(2.0)
+                        if(d_p < 0):
+                            p.data.mul_(0.5)
+                    print(f'grad group came: {group} data {p.data}')
+
+            #pdb.set_trace()
+            # Apply step
             loss = super().step(*args, **kwargs)
-            #print(self.param_groups[-1])
 
             return loss
 
@@ -72,7 +86,6 @@ def get_tpr_optim(optim, name):
         _tpr_optims[name] = _gen_tpr_optim(optim, name)
 
     return _tpr_optims[name]
-
 
 
 
