@@ -53,7 +53,7 @@ def _gen_tpr_optim(optim, name):
             Narrow weights are used in forward and backward passes.
         """
         def __init__(self, *args, **kwargs):
-            self.tpr_args = unpack_tpr_args(kwargs)
+            #self.tpr_args = unpack_tpr_args(kwargs)
             super().__init__(*args, **kwargs)
 
         def step(self, *args, **kwargs):
