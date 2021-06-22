@@ -68,7 +68,7 @@ class BasicBlock(nn.Module):
 
     def forward(self, x):
         residual = out = x
-
+        print('--------block------')
         #pdb.set_trace()
         if self.block_gates[0]:
             print(out.shape)
