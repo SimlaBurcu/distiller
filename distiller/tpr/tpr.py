@@ -162,29 +162,29 @@ def unpack_tpr_args(kwargs):
 class _Scale_down(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, grad_scale):
-        print(f'_Scale_down forward input:{x}, {grad_scale}')
+        #print(f'_Scale_down forward input:{x}, {grad_scale}')
         ctx.grad_scale = grad_scale
-        print(f'_Scale_down forward output:{x / grad_scale}')
+        #print(f'_Scale_down forward output:{x / grad_scale}')
         return x / grad_scale
 
     @staticmethod
     def backward(ctx, grad):
-        print(f'_Scale_down backward input:{grad}')
+        #print(f'_Scale_down backward input:{grad}')
         grad_scale = ctx.grad_scale
-        print(f'_Scale_down backward output:{grad / grad_scale}')
+        #print(f'_Scale_down backward output:{grad / grad_scale}')
         return grad / grad_scale, None
 
 class _Scale_up(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, grad_scale):
-        print(f'_Scale_up forward input:{x}, {grad_scale}')
+        #print(f'_Scale_up forward input:{x}, {grad_scale}')
         ctx.grad_scale = grad_scale
-        print(f'_Scale_up forward output:{x * grad_scale}')
+        #print(f'_Scale_up forward output:{x * grad_scale}')
         return x * grad_scale
 
     @staticmethod
     def backward(ctx, grad):
-        print(f'_Scale_up backward input:{grad}')
+        #print(f'_Scale_up backward input:{grad}')
         grad_scale = ctx.grad_scale
         toret = grad * grad_scale
 
@@ -194,26 +194,26 @@ class _Scale_up(torch.autograd.Function):
         if torch.max(toret)<=32:
             g_scale = torch.tensor(1.0, requires_grad=False)
 
-        print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
+        #print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
         return toret, g_scale
 
 class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w, bias=None, stride=1, padding=0, dilation=1, groups=1):
-        print(f'_TPR forward input:{x}, {w}')
+        #print(f'_TPR forward input:{x}, {w}')
         ctx.save_for_backward(x, w, bias)
         ctx.stride = stride
         ctx.padding = padding
         ctx.dilation = dilation
         ctx.groups = groups
         out = F.conv2d(x, w, bias, stride, padding, dilation, groups)
-        print(f'_TPR forward output:{out}')
+        #print(f'_TPR forward output:{out}')
         return out
 
 
     @staticmethod
     def backward(ctx, grad_output):
-        print(f'_TPR backward input:{grad_output}')
+        #print(f'_TPR backward input:{grad_output}')
         #pdb.set_trace()
         input, weight, bias = ctx.saved_tensors
         stride = ctx.stride
@@ -227,23 +227,23 @@ class _TPR(torch.autograd.Function):
         grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = odd.sum((0,2,3)).squeeze(0)
-        print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
+        #print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
         return grad_input, grad_weight, grad_bias, None, None, None, None
 '''
 
 class _TPR(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, w, bias=None):
-        print(f'_TPR forward input:{x}, {w}')
+        #print(f'_TPR forward input:{x}, {w}')
         ctx.save_for_backward(x, w, bias)
         out = x+w
-        print(f'_TPR forward output:{out}')
+        #print(f'_TPR forward output:{out}')
         return out
 
 
     @staticmethod
     def backward(ctx, grad_output):
-        print(f'_TPR backward input:{grad_output}')
+        #print(f'_TPR backward input:{grad_output}')
         #pdb.set_trace()
         input, weight, bias = ctx.saved_tensors
         grad_input = grad_weight = grad_bias = None
@@ -252,7 +252,7 @@ class _TPR(torch.autograd.Function):
         grad_weight = 2000+input
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = torch.tensor(66.5, requires_grad=True)
-        print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
+        #print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
         return grad_input, grad_weight, grad_bias
 '''
 
@@ -268,13 +268,13 @@ class TPRConv2d(torch.nn.Conv2d):
 
     def forward(self, input):
         #pdb.set_trace()
-        print(f'_TPR module forward input:{input} ')
+        #print(f'_TPR module forward input:{input} ')
         input = _Scale_down.apply(input, self.grad_scale)
-        print(f'_TPR module forward scaled down:{input} weight: {self.weight}')
+        #print(f'_TPR module forward scaled down:{input} weight: {self.weight}')
         input = _TPR.apply(input, self.weight, self.bias)
-        print(f'_TPR module forward tpred:{input} weight: {self.weight}')
+        #print(f'_TPR module forward tpred:{input} weight: {self.weight}')
         input = _Scale_up.apply(input, self.grad_scale)
-        print(f'_TPR module forward scaled up:{input} weight: {self.weight}')
+        #print(f'_TPR module forward scaled up:{input} weight: {self.weight}')
 
         return input
 
@@ -300,7 +300,7 @@ def test():
 
     input = [torch.randn(20, 20, dtype=torch.double, requires_grad=True)]
     test = gradcheck(moduleConv, input, eps=1e-6, atol=1e-4)
-    print("Are the gradients correct: ", test)
+    #print("Are the gradients correct: ", test)
 
 
 def test_float_to_fp4():
@@ -330,24 +330,24 @@ def test_float_to_fp4():
         finaleven.append(c)
         finalodd.append(d)
     end = time.time()
-    print('first:')
-    print(end - start)
+    #print('first:')
+    #print(end - start)
 
-    print(torch.tensor(finaleven).view(orig_shape))
-    print(torch.tensor(finalodd).view(orig_shape))
+    #print(torch.tensor(finaleven).view(orig_shape))
+    #print(torch.tensor(finalodd).view(orig_shape))
     t = torch.tensor(numbers).view(2,4,4)
-    ##print(f't orig:{t}')
+    ###print(f't orig:{t}')
     orig_shape = t.size()
     t = t.view(-1)
-    ##print(f't:{t}')
+    ###print(f't:{t}')
     quantized = []
     for i in t:
         i = tpr(i, epsilon, "even", device)
         quantized.append(i)
-    ##print(f't:{t}')
-    ##print(f'quantized:{quantized}')
-    print(final)
-    print(torch.tensor(quantized).view(orig_shape))
+    ###print(f't:{t}')
+    ###print(f'quantized:{quantized}')
+    #print(final)
+    #print(torch.tensor(quantized).view(orig_shape))
     '''
 
     for i in range(1000):
@@ -357,8 +357,8 @@ def test_float_to_fp4():
     for i in range(1000):
         e,o=tensortpr(x_data, epsilon, "even", device)
     end = time.time()
-    #print(f'first: {end - start}')
-    #print(f'even: {e}, odd: {o}')
+    ##print(f'first: {end - start}')
+    ##print(f'even: {e}, odd: {o}')
 
 
 import unittest
@@ -403,7 +403,7 @@ class TestAutograd(unittest.TestCase):
         # backward tasks to the queue. We want to ensure all the reentrant tasks
         # are prioritized over the MyFunction backward task regardless of their
         # sequence numbers
-        print(order)
+        #print(order)
         self.assertEqual(len(order), 11)
         self.assertEqual(order.count("Reentrant"), 10)
         self.assertEqual(order[-1], "MyFunction")
@@ -420,19 +420,19 @@ class TestAutograd(unittest.TestCase):
 
         for shape in [(1,), ()]:
             v = torch.ones(shape, requires_grad=True)
-            #print(f'v: {v}')
+            ##print(f'v: {v}')
             MyFunction.apply(v).backward()
-            #print(f'v: {v}')
-            #print(f'v.grad: {v.grad}')
-            #print(f'full: {torch.full(shape, 2.)}')
+            ##print(f'v: {v}')
+            ##print(f'v.grad: {v.grad}')
+            ##print(f'full: {torch.full(shape, 2.)}')
             self.assertEqual(v.grad, torch.full(shape, 2.))
 
             with torch.no_grad():
                 v.grad.zero_()
             MyFunction.apply(v.clone()).backward()
-            #print(f'v: {v}')
-            #print(f'v.grad: {v.grad}')
-            #print(f'full: {torch.full(shape, 2.)}')
+            ##print(f'v: {v}')
+            ##print(f'v.grad: {v.grad}')
+            ##print(f'full: {torch.full(shape, 2.)}')
             self.assertEqual(v.grad, torch.full(shape, 2.))
 
 def test_autograd():
@@ -440,31 +440,31 @@ def test_autograd():
     class down(torch.autograd.Function):
         @staticmethod
         def forward(ctx, x, grad_scale):
-            print(f'down forward input:{x}')
+            #print(f'down forward input:{x}')
             ctx.grad_scale = grad_scale
-            print(f'down forward output:{x / grad_scale}')
+            #print(f'down forward output:{x / grad_scale}')
             return x / grad_scale
 
         @staticmethod
         def backward(ctx, grad):
-            print(f'down backward input:{grad}')
+            #print(f'down backward input:{grad}')
             grad_scale = ctx.grad_scale
-            print(f'down backward output:{grad / grad_scale}')
+            #print(f'down backward output:{grad / grad_scale}')
             return grad / grad_scale, None
 
     class up(torch.autograd.Function):
         @staticmethod
         def forward(ctx, x, grad_scale):
-            print(f'up forward input:{x}')
+            #print(f'up forward input:{x}')
             ctx.grad_scale = grad_scale
-            print(f'up forward output:{x * grad_scale}')
+            #print(f'up forward output:{x * grad_scale}')
             return x * grad_scale
 
         @staticmethod
         def backward(ctx, grad):
-            print(f'up backward input:{grad}')
+            #print(f'up backward input:{grad}')
             grad_scale = ctx.grad_scale
-            print(f'up backward output:{grad * grad_scale}')
+            #print(f'up backward output:{grad * grad_scale}')
             return grad * grad_scale, None
 
     class tpr(torch.autograd.Function):
@@ -475,13 +475,13 @@ def test_autograd():
 
         @staticmethod
         def backward(ctx, grad_output):
-            print(f'tpr backward input:{grad_output}')
+            #print(f'tpr backward input:{grad_output}')
             input, weight = ctx.saved_tensors
             grad_input = grad_weight = None
 
             grad_input = 100*weight
             grad_weight = 10*input
-            print(f'tpr backward output:{grad_input}, {grad_weight}')
+            #print(f'tpr backward output:{grad_input}, {grad_weight}')
             return grad_input, grad_weight
 
 
@@ -494,34 +494,34 @@ def test_autograd():
         @staticmethod
         def backward(ctx, grad_output):
             #pdb.set_trace()
-            print(f'tpr2 backward input:{grad_output}')
+            #print(f'tpr2 backward input:{grad_output}')
             input, weight = ctx.saved_tensors
             grad_output.requires_grad = True
             with torch.enable_grad():
                 '''
                 grad_output = tpr.apply(grad_output, torch.tensor(1.0, requires_grad=False))
-                #print(f'grad_output:{grad_output}')
+                ##print(f'grad_output:{grad_output}')
                 grad_input , grad_weight = grad_output.backward()
-                #print(f'grad calc:{grad_input}, {grad_weight}')
+                ##print(f'grad calc:{grad_input}, {grad_weight}')
                 '''
                 y = input * 5 + grad_output*62
                 t = torch.autograd.grad(y, input)
                 k = torch.autograd.grad(y, grad_output)
-                #print(f'grad calc:{y}, {input}, {grad_output}, {t}, {k}')
+                ##print(f'grad calc:{y}, {input}, {grad_output}, {t}, {k}')
 
                 grad_input = 100*grad_input
                 grad_weight = 10*grad_weight
-                print(f'tpr2 backward output:{grad_input}, {grad_weight}')
+                #print(f'tpr2 backward output:{grad_input}, {grad_weight}')
                 return grad_input, grad_weight
 
     input = torch.tensor(6.0, requires_grad=True)
-    print(f'main: {input}')
+    #print(f'main: {input}')
     input = down.apply(input, torch.tensor(3.0, requires_grad=True))
-    print(f'main down: {input}')
+    #print(f'main down: {input}')
     input = tpr.apply(input, torch.tensor(5.0, requires_grad=True))
-    print(f'main tpr: {input}')
+    #print(f'main tpr: {input}')
     input = up.apply(input, torch.tensor(3.0, requires_grad=True))
-    print(f'main up: {input}')
+    #print(f'main up: {input}')
     input.backward()
 
 def gradtest():
@@ -541,7 +541,7 @@ def gradtest():
 
     x = torch.tensor(5.0, requires_grad=True)
     m = exampleFct.apply(x).sum().backward()
-    print(x.grad.data)
+    #print(x.grad.data)
 
 
 if __name__ == '__main__':
