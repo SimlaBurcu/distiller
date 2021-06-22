@@ -38,7 +38,7 @@ import distiller.quantization as quantization
 import distiller.models as models
 from distiller.models import create_model
 from distiller.utils import float_range_argparse_checker as float_range
-from distiller.tpr_optim import get_tpr_optim
+from distiller.tpr.tpr_optim import get_tpr_optim
 import pdb
 
 
