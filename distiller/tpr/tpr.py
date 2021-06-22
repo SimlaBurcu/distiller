@@ -264,7 +264,7 @@ class TPRConv2d(torch.nn.Conv2d):
                  padding=0, dilation=1, groups=1, bias=True, **kwargs):
         super().__init__(in_channels, out_channels, kernel_size, stride,
                          padding, dilation, groups, bias, **kwargs)
-        self.grad_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False, device=cuda0))
+        self.grad_scale = torch.nn.Parameter(torch.tensor(10.0, requires_grad=False, device="cuda:0"))
 
     def forward(self, input):
         #pdb.set_trace()
