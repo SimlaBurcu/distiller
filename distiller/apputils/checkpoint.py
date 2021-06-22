@@ -71,9 +71,11 @@ def save_checkpoint(epoch, arch, model, optimizer=None, scheduler=None,
     except AttributeError:
         pass
 
+    '''
     if optimizer is not None:
         checkpoint['optimizer_state_dict'] = optimizer.state_dict()
         checkpoint['optimizer_type'] = type(optimizer)
+    '''
     if scheduler is not None:
         checkpoint['compression_sched'] = scheduler.state_dict()
     if hasattr(model, 'thinning_recipes'):
