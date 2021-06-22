@@ -273,7 +273,8 @@ class TPRConv2d(torch.nn.Conv2d):
         input = _Scale_down.apply(input, self.grad_scale)
         print(f'in tpr1: {input.shape}')
         #print(f'_TPR module forward scaled down:{input} weight: {self.weight}')
-        input = _TPR.apply(input, self.weight, self.bias)
+        input = _TPR.apply(input, self.weight, self.bias, self.stride,
+                        self.padding, self.dilation, self.groups)
         print(f'in tpr2: {input.shape}')
         #print(f'_TPR module forward tpred:{input} weight: {self.weight}')
         input = _Scale_up.apply(input, self.grad_scale)
