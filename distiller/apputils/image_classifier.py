@@ -472,8 +472,8 @@ def _init_learner(args):
             else:
                 model_parameters.append(parameter)
                 n_model_parameters.append(name)
-        print(gradscale)
-        print(model_parameters)
+        print(n_gradscale)
+        print(n_model_parameters)
         TPRSGD = get_bfp_optim(SGD, "SGD")
         optimizer = TPRSGD([{'params': gradscale, 'lr': 0.},{'params': model_parameters}], lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
         msglogger.debug('Optimizer Type: %s', type(optimizer))
