@@ -69,15 +69,22 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         residual = out = x
 
-        #pdb.set_trace()
+        pdb.set_trace()
+        print('--------block ')
         if self.block_gates[0]:
+            print(out.shape)
             out = self.conv1(x)
+            print(out.shape)
             out = self.bn1(out)
+            print(out.shape)
             out = self.relu1(out)
+            print(out.shape)
 
         if self.block_gates[1]:
             out = self.conv2(out)
+            print(out.shape)
             out = self.bn2(out)
+            print(out.shape)
 
         if self.downsample is not None:
             residual = self.downsample(x)
@@ -137,9 +144,14 @@ class ResNetCifar(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        print('------forward')
+        print(x.shape)
         x = self.conv1(x)
+        print(x.shape)
         x = self.bn1(x)
+        print(x.shape)
         x = self.relu(x)
+        print(x.shape)
 
         x = self.layer1(x)
         x = self.layer2(x)
