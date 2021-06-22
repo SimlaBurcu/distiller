@@ -58,18 +58,18 @@ def _gen_tpr_optim(optim, name):
 
         def step(self, *args, **kwargs):
             for group in self.param_groups:
-                print(group)
+                #print(group)
                 if(group['lr']==0.0):
                     for p in group['params']:
                         if p.grad is None:
                             continue
                         d_p = p.grad.data
-                        print(f'gradscales grad {d_p}')
+                        #print(f'gradscales grad {d_p}')
                         if(d_p > 0):
                             p.data.mul_(2.0)
                         if(d_p < 0):
                             p.data.mul_(0.5)
-                    print(f'grad group came: {group} data {p.data}')
+                    #print(f'grad group came: {group} data {p.data}')
 
             #pdb.set_trace()
             # Apply step
@@ -633,7 +633,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
     model.train()
     acc_stats = []
     end = time.time()
-    pdb.set_trace()
+    #pdb.set_trace()
     for train_step, (inputs, target) in enumerate(train_loader):
         # Measure data loading time
         data_time.add(time.time() - end)
@@ -693,7 +693,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
         # Compute the gradient and do SGD step
         optimizer.zero_grad()
 
-        pdb.set_trace()
+        #pdb.set_trace()
         loss.backward()
         if compression_scheduler:
             compression_scheduler.before_parameter_optimization(epoch, train_step, steps_per_epoch, optimizer)
