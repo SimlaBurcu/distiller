@@ -461,10 +461,17 @@ def _init_learner(args):
     if optimizer is None and not args.evaluate:
         #TPRSGD = get_tpr_optim(torch.optim.SGD, "SGD")
         #optimizer = TPRSGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
-        optimizer = torch.optim.SGD([{'params': gradscale, 'lr': 0.},{'params': model.parameters()}], lr=args.lr,
-                                    momentum=args.momentum, weight_decay=args.weight_decay)
+        model_parameters = []
+        gradscale = []
+        for name, parameter in model.named_parameters():
+            if 'grad_scale' in name:
+                gradscale.append(parameter)
+            else:
+                model_parameters.append(parameter)
+        print(gradscale)
+        print(model_parameters)
         TPRSGD = get_bfp_optim(SGD, "SGD")
-        optimizer = TPRSGD([{'params': gradscale, 'lr': 0.},{'params': model.parameters()}], lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+        optimizer = TPRSGD([{'params': gradscale, 'lr': 0.},{'params': model_parameters}], lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
         msglogger.debug('Optimizer Type: %s', type(optimizer))
         msglogger.debug('Optimizer Args: %s', optimizer.defaults)
 
