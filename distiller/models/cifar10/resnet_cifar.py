@@ -71,13 +71,19 @@ class BasicBlock(nn.Module):
 
         pdb.set_trace()
         if self.block_gates[0]:
+            print(out.shape)
             out = self.conv1(x)
+            print(out.shape)
             out = self.bn1(out)
+            print(out.shape)
             out = self.relu1(out)
+            print(out.shape)
 
         if self.block_gates[1]:
             out = self.conv2(out)
+            print(out.shape)
             out = self.bn2(out)
+            print(out.shape)
 
         if self.downsample is not None:
             residual = self.downsample(x)
