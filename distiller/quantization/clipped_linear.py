@@ -267,6 +267,7 @@ class PACTQuantizer(Quantizer):
         #pdb.set_trace()
 
         def relu_replace_fn(module, name, qbits_map):
+            print("........relu_replace_fn")
             #pdb.set_trace()
             bits_acts = qbits_map[name].acts
             if bits_acts is None:
