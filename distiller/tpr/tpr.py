@@ -214,7 +214,7 @@ class _TPR(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad_output):
         #print(f'_TPR backward input:{grad_output}')
-        pdb.set_trace()
+        #pdb.set_trace()
         input, weight, bias = ctx.saved_tensors
         stride = ctx.stride
         padding = ctx.padding
