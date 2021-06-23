@@ -69,7 +69,7 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         residual = out = x
 
-        pdb.set_trace()
+        #pdb.set_trace()
         #print('--------block ')
         if self.block_gates[0]:
             #print(out.shape)
@@ -144,7 +144,7 @@ class ResNetCifar(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        pdb.set_trace()
+        #pdb.set_trace()
         #print('------forward')
         #print(x.shape)
         x = self.conv1(x)
