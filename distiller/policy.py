@@ -317,6 +317,7 @@ class LRPolicy(ScheduledTrainingPolicy):
 class QuantizationPolicy(ScheduledTrainingPolicy):
     def __init__(self, quantizer):
         super(QuantizationPolicy, self).__init__()
+        print("........quantization policy initialized")
         self.quantizer = quantizer
         self.quantizer.prepare_model()
         ##SCALE DOWN?
@@ -326,4 +327,5 @@ class QuantizationPolicy(ScheduledTrainingPolicy):
         # After parameters update, quantize the parameters again
         # (Doing this here ensures the model parameters are quantized at training completion (and at validation time)
         #SCALE DOWN?
+        print("........quantization policy on minibatch end")
         self.quantizer.quantize_params()

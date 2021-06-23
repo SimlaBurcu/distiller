@@ -59,6 +59,7 @@ class LearnedClippedLinearQuantization(nn.Module):
         self.inplace = inplace
 
     def forward(self, input):
+        print("........LearnedClippedLinearQuantization")
         #pdb.set_trace()
         # Clip between 0 to the learned clip_val
         input = F.relu(input, self.inplace)
@@ -158,6 +159,7 @@ class SAWB_QuantFunc_Asymm(torch.autograd.Function):
 class SAWB_QuantFunc_STE(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, eps, alpha, beta, delta=0):
+        print("........sawb quantization forward")
         # we quantize also alpha, beta. for beta it's "cosmetic", for alpha it is
         # substantial, because also alpha will be represented as a wholly integer number
         # down the line
@@ -171,10 +173,12 @@ class SAWB_QuantFunc_STE(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
+        print("........sawb quantization backward")
         # Straight-through estimator
         return grad_output, None, None, None, None
 
 def dorefa_quantize_param(param_fp, param_meta):
+    print("........sawb quantization function")
     asymmetric = False
     if param_meta.num_bits == 1:
         out = DorefaParamsBinarizationSTE.apply(param_fp)
@@ -231,6 +235,7 @@ class DorefaQuantizer(Quantizer):
                                               train_with_fp_copy=True, overrides=overrides)
 
         def relu_replace_fn(module, name, qbits_map):
+            print("........relu_replace_fn")
             bits_acts = qbits_map[name].acts
             if bits_acts is None:
                 return module

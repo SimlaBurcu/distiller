@@ -47,7 +47,8 @@ def _gen_tpr_optim(optim, name):
             super().__init__(*args, **kwargs)
 
         def step(self, *args, **kwargs):
-            pdb.set_trace()
+            print(f'___TPROptim}')
+            #pdb.set_trace()
             for group in self.param_groups:
                 #print(group)
                 if(group['lr']==0.0):

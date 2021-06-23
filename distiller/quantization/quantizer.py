@@ -225,6 +225,7 @@ class Quantizer(object):
             will be ignored. A warning message will be shown.
         """
         #pdb.set_trace()
+        print("........prepare_model")
         if self.prepared:
             raise RuntimeError('prepare_model can be called only once')
 
@@ -278,6 +279,7 @@ class Quantizer(object):
         pass
 
     def _pre_process_container(self, container, prefix=''):
+        print("........_pre_process_container")
         def replace_msg(module_name, modules=None):
             msglogger.debug('Module ' + module_name)
             if modules:
@@ -365,6 +367,7 @@ class Quantizer(object):
         """
         Quantize all parameters using self.param_quantization_fn (with the defined number of bits for each parameter)
         """
+        print("........quantize params")
         #pdb.set_trace()
         for ptq in self.params_to_quantize:
             q_param = self.param_quantization_fn(getattr(ptq.module, ptq.fp_attr_name), ptq)
