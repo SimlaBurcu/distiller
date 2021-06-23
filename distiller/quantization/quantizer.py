@@ -144,7 +144,7 @@ class Quantizer(object):
                           wts=v.pop('bits_weights', self.default_qbits.wts),
                           bias=v.pop('bits_bias', self.default_qbits.bias))
             v['bits'] = qbits
-
+        pdb.set_trace()
         # Prepare explicit mapping from each layer to QBits based on default + overrides
         patterns = []
         regex_overrides = None
