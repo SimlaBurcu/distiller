@@ -253,6 +253,7 @@ class Quantizer(object):
                 if self.train_with_fp_copy:
                     hack_float_backup_parameter(module, param_name, n_bits)
                     fp_attr_name = FP_BKP_PREFIX + param_name
+                pdb.set_trace()
                 self.params_to_quantize.append(_ParamToQuant(module, module_name, fp_attr_name, param_name, n_bits))
 
                 param_full_name = '.'.join([module_name, param_name])
