@@ -69,7 +69,7 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         residual = out = x
 
-        #pdb.set_trace()
+        pdb.set_trace()
         #print('--------block ')
         if self.block_gates[0]:
             #print(out.shape)
@@ -109,7 +109,7 @@ class ResNetCifar(nn.Module):
 
         self.inplanes = 16  # 64
         super(ResNetCifar, self).__init__()
-        self.conv1 = TPRConv2d(in_channels=3, out_channels=self.inplanes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=self.inplanes, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.layer1 = self._make_layer(self.layer_gates[0], block, 16, layers[0])
@@ -144,6 +144,7 @@ class ResNetCifar(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        pdb.set_trace()
         #print('------forward')
         #print(x.shape)
         x = self.conv1(x)

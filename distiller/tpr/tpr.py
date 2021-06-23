@@ -177,14 +177,14 @@ class _Scale_down(torch.autograd.Function):
 class _Scale_up(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, grad_scale):
-        #print(f'_Scale_up forward input:{x}, {grad_scale}')
+        print(f'_Scale_up forward input:{x}, {grad_scale}')
         ctx.grad_scale = grad_scale
-        #print(f'_Scale_up forward output:{x * grad_scale}')
+        print(f'_Scale_up forward output:{x * grad_scale}')
         return x * grad_scale
 
     @staticmethod
     def backward(ctx, grad):
-        #print(f'_Scale_up backward input:{grad}')
+        print(f'_Scale_up backward input:{grad}')
         grad_scale = ctx.grad_scale
         toret = grad * grad_scale
 
@@ -194,7 +194,7 @@ class _Scale_up(torch.autograd.Function):
         if torch.max(toret)<=32:
             g_scale = torch.tensor(1.0, requires_grad=False, device="cuda:0")
 
-        #print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
+        print(f'_Scale_up backward output:{grad * grad_scale} g_scale:{g_scale}')
         return toret, g_scale
 
 class _TPR(torch.autograd.Function):
@@ -213,8 +213,8 @@ class _TPR(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        #print(f'_TPR backward input:{grad_output}')
-        #pdb.set_trace()
+        print(f'_TPR backward input:{grad_output}')
+        pdb.set_trace()
         input, weight, bias = ctx.saved_tensors
         stride = ctx.stride
         padding = ctx.padding
@@ -227,7 +227,7 @@ class _TPR(torch.autograd.Function):
         grad_weight = torch.nn.grad.conv2d_weight(input, weight.shape, odd, stride, padding, dilation, groups)
         if bias is not None and ctx.needs_input_grad[2]:
             grad_bias = odd.sum((0,2,3)).squeeze(0)
-        #print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
+        print(f'_TPR backward output:{grad_input},{grad_weight},{grad_bias}')
         return grad_input, grad_weight, grad_bias, None, None, None, None
 '''
 
