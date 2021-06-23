@@ -246,7 +246,9 @@ class Quantizer(object):
             qbits = self.module_qbits_map[module_name]
             curr_parameters = dict(module.named_parameters())
             for param_name, param in curr_parameters.items():
+                print(param_name)
                 n_bits = qbits.bias if param_name.endswith('bias') else qbits.wts
+                print(n_bits)
                 if n_bits is None:
                     continue
                 fp_attr_name = param_name
